@@ -1,0 +1,46 @@
+# =============================================================================
+# context/sensitive-tables.yaml
+# =============================================================================
+# Tablas con datos personales (PII) o información sensible.
+# El wrapper del MCP de MariaDB NO bloquea el acceso (decisión de negocio:
+# a veces hay que consultar datos críticos), pero muestra un warning una
+# vez por sesión recordando que los resultados pueden tener datos sensibles.
+#
+# Los queries sobre estas tablas se loguean SIN los resultados, solo el
+# query en sí, para trazabilidad sin filtración.
+#
+# ESTADO: Esta lista arranca vacía. Primer issue post-bootstrap: poblar
+# con la lista real del cliente. Mientras tanto, el wrapper usa heurística
+# por nombre (`denuncia*`, `trabajador*`, `persona*`, etc).
+# =============================================================================
+
+# Formato:
+#   - name: nombre_tabla
+#     pii_fields: lista de columnas con datos personales
+#     category: tipo de sensibilidad
+
+sensitive_tables: []
+
+# -----------------------------------------------------------------------------
+# Heurística (usada mientras la lista esté vacía o incompleta)
+# -----------------------------------------------------------------------------
+# El wrapper considera sensible cualquier tabla cuyo nombre matchee estos
+# patrones, además de las listadas arriba.
+
+heuristic_patterns:
+  - "denuncia*"
+  - "trabajador*"
+  - "persona*"
+  - "empleado*"
+  - "*_dni"
+  - "contacto*"
+  - "*_direccion"
+  - "historia_clinica*"
+
+# -----------------------------------------------------------------------------
+# Política
+# -----------------------------------------------------------------------------
+# 1. Warning de PII se muestra UNA VEZ por sesión (no en cada query).
+# 2. Queries que tocan tablas sensibles se loguean sin resultados.
+# 3. Nunca copiar resultados de estas tablas a documentación o case studies
+#    sin ofuscar.

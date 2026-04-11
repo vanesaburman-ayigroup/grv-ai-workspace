@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "mariadb-dev": {
+      "description": "MariaDB read-only, ambiente DEV. Default para todas las operaciones.",
+      "type": "sse",
+      "url": "http://localhost:3333/sse",
+      "env": {
+        "MARIADB_HOST": "${GRV_MARIADB_DEV_HOST}",
+        "MARIADB_PORT": "${GRV_MARIADB_DEV_PORT}",
+        "MARIADB_USER": "${GRV_MARIADB_DEV_USER}",
+        "MARIADB_PASSWORD": "${GRV_MARIADB_DEV_PASSWORD}",
+        "MARIADB_DATABASE": "${GRV_MARIADB_DEV_DATABASE}",
+        "MARIADB_READONLY": "${GRV_MARIADB_DEV_READONLY}",
+        "MARIADB_MAX_EXECUTION_TIME_MS": "${GRV_MARIADB_MAX_EXECUTION_TIME_MS}"
+      }
+    },
+    "mariadb-prod": {
+      "description": "MariaDB read-only, ambiente PROD. Requiere cambio explícito del usuario. NUNCA usar sin confirmación.",
+      "type": "sse",
+      "url": "http://localhost:3334/sse",
+      "env": {
+        "MARIADB_HOST": "${GRV_MARIADB_PROD_HOST}",
+        "MARIADB_PORT": "${GRV_MARIADB_PROD_PORT}",
+        "MARIADB_USER": "${GRV_MARIADB_PROD_USER}",
+        "MARIADB_PASSWORD": "${GRV_MARIADB_PROD_PASSWORD}",
+        "MARIADB_DATABASE": "${GRV_MARIADB_PROD_DATABASE}",
+        "MARIADB_READONLY": "${GRV_MARIADB_PROD_READONLY}",
+        "MARIADB_MAX_EXECUTION_TIME_MS": "${GRV_MARIADB_MAX_EXECUTION_TIME_MS}"
+      },
+      "requiresConfirmation": true
+    },
+    "playwright": {
+      "description": "Automatización de navegador. Usado para E2E de microfrontends single-spa y verificación visual.",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "context7": {
+      "description": "Documentación actualizada de librerías (Spring Boot, React, RTK Query, MariaDB, etc).",
+      "type": "sse",
+      "url": "https://mcp.context7.com/mcp",
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
+    },
+    "sequential-thinking": {
+      "description": "Razonamiento paso a paso. Activar para migraciones complejas, debugging de bugs multi-servicio.",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "granola": {
+      "description": "Transcripciones y notas de reuniones de Granola. Usado por granola-to-actions y automation-finder.",
+      "type": "sse",
+      "url": "https://mcp.granola.ai/mcp"
+    }
+  }
+}

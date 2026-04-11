@@ -1,0 +1,99 @@
+# =============================================================================
+# context/regulations.yaml
+# =============================================================================
+# Índice de normativa ART/SRT relevante para la plataforma.
+# No contiene el texto completo de las resoluciones (eso vive en el RAG
+# de agente-srt), pero sí la referencia y el impacto en el código.
+# =============================================================================
+
+laws:
+
+  - id: ley-24557
+    name: Ley 24.557 de Riesgos del Trabajo
+    year: 1995
+    scope: >
+      Ley marco del sistema de riesgos del trabajo en Argentina. Define
+      obligaciones del empleador, derechos del trabajador, rol de la ART.
+    applies_to: [todo-el-sistema]
+
+resolutions:
+
+  - id: res-srt-237-96
+    name: Resolución SRT 237/96
+    topic: Cálculo de ILT
+    impact: >
+      Define que el día del accidente cuenta como día trabajado, no como
+      día de ILT. La plataforma lo implementa con
+      `ChronoUnit.DAYS.between(LocalDate, LocalDate)`.
+    used_by: [wssiniestralidad, wsprestaciones]
+
+  - id: res-srt-283-02
+    name: Resolución SRT 283/02
+    topic: "[pendiente de validar]"
+    status: pending
+    impact: >
+      [Pendiente de validar con el equipo. Originalmente se había documentado
+      como trazadoras ROAM, pero esa definición no estaba correcta. Confirmar
+      qué regula exactamente esta resolución en el contexto de GRV antes
+      de usarla en skills o respuestas.]
+    used_by: []
+
+  - id: res-srt-3326-14
+    name: Resolución SRT 3326/14
+    topic: Formato de archivo posicional AT
+    impact: >
+      Define el layout del archivo posicional de accidentes de trabajo
+      que las ARTs deben enviar a SRT. Implementado en wssiniestralidad.
+      Tiene reglas estrictas sobre:
+        - Alineación (campos numéricos right-aligned, strings left-aligned)
+        - Padding (espacios vs ceros según tipo)
+        - Valores para null (" " vs "N" vs "0")
+    used_by: [wssiniestralidad]
+    gotchas:
+      - "boolToSN debe devolver ' ' para null, no 'N'"
+      - "campo() por default alinea left; usar right para numéricos"
+
+  - id: res-srt-3327-14
+    name: Resolución SRT 3327/14
+    topic: Formato de archivo posicional EP
+    impact: >
+      Mismo concepto que 3326/14 pero para enfermedades profesionales.
+      Comparte la mayoría de las reglas pero con campos adicionales de
+      clasificación ESOP.
+    used_by: [wssiniestralidad]
+
+  - id: res-srt-81-19
+    name: Resolución SRT 81/19
+    topic: Códigos de agentes causantes de EP (Anexo III)
+    impact: >
+      Define el listado ESOP de códigos que clasifican el agente causante
+      de enfermedades profesionales. Usado en la generación de archivos EP.
+    used_by: [wssiniestralidad]
+
+  - id: res-srt-298-17
+    name: Resolución SRT 298/17
+    topic: (pendiente de documentar)
+    status: to-document
+    notes: "Agregar cuando venga un caso que la invoque."
+
+# -----------------------------------------------------------------------------
+# Catálogos referenciados por las resoluciones
+# -----------------------------------------------------------------------------
+catalogs:
+
+  - name: CIE-10
+    description: Clasificación Internacional de Enfermedades 10ª revisión
+    maintained_by: OMS
+
+  - name: CIE-10 trazadora
+    description: "Subset de CIE-10 que dispara validaciones especiales en el flujo SRT"
+    table: config_trazadora_cie10
+    known_issue: "Lookup devuelve códigos incorrectos (A23.x en lugar de trauma)"
+
+  - name: ESOP
+    description: Códigos de agentes causantes de EP
+    source: Res. SRT 81/19 Anexo III
+
+  - name: ATEP
+    description: Códigos de agentes de riesgo / circunstancias
+    source: varios anexos

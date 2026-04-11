@@ -1,0 +1,273 @@
+# =============================================================================
+# context/glossary.yaml
+# =============================================================================
+# Glosario del dominio de GRV (Grupo Río Varadero). Cubre ART/SRT,
+# accidentes personales y autoasegurados, que son las unidades de negocio
+# del cliente sobre las que trabajamos.
+#
+# Regla: Claude no inventa definiciones. Si un término no está acá, o si
+# está marcado como "pendiente", debe decirlo y ofrecer completarlo
+# con el usuario en lugar de improvisar.
+# =============================================================================
+
+terms:
+
+  # --- Organizaciones ---
+
+  AYI:
+    definition: >
+      Consultora argentina de software. Es nosotros. Construye y mantiene
+      la plataforma de GRV.
+
+  GRV:
+    full_name: Grupo Río Varadero
+    definition: >
+      Cliente principal de AYI. Tiene varias unidades de negocio; nosotros
+      trabajamos sobre las relacionadas con riesgos del trabajo y accidentes.
+    business_units:
+      - Administración de siniestros laborales para clientes ART
+      - Pólizas de accidentes personales
+      - Gerenciadora de empleadores autoasegurados
+
+  # --- Actores y entidades ---
+
+  ART:
+    full_name: Aseguradora de Riesgos del Trabajo
+    definition: >
+      Entidad privada que contrata el empleador para cubrir los riesgos
+      derivados del trabajo de sus empleados. Obligatoria por Ley 24.557.
+    related: [empleador, trabajador, SRT]
+
+  SRT:
+    full_name: Superintendencia de Riesgos del Trabajo
+    definition: >
+      Organismo regulador del sistema de riesgos del trabajo en Argentina.
+      Dicta normas, recibe archivos posicionales, audita ARTs.
+    url: "https://www.argentina.gob.ar/srt"
+
+  autoasegurado:
+    definition: >
+      Empleador que gestiona sus propios riesgos del trabajo en lugar de
+      contratar una ART. GRV tiene una unidad de negocio dedicada a
+      gerenciar autoasegurados.
+
+  trabajador:
+    definition: >
+      Persona empleada que puede ser sujeto de un siniestro laboral.
+      Contiene PII sensible (nombre, DNI, dirección, historia clínica).
+
+  prestador:
+    definition: >
+      Entidad externa (clínica, consultorio, kinesiólogo, farmacia, agencia
+      de traslados) que brinda la prestación al trabajador siniestrado.
+
+  agencia:
+    definition: >
+      Tipo específico de prestador — generalmente agencia de traslados
+      contratada para mover pacientes.
+
+  # --- Tipos de siniestro y eventos ---
+
+  siniestro-laboral:
+    definition: >
+      Evento que genera derecho a prestaciones bajo Ley 24.557. Tres tipos:
+      accidente de trabajo (AT), enfermedad profesional (EP), accidente
+      in-itinere.
+    types: [AT, EP, in-itinere]
+
+  accidente-personal:
+    definition: >
+      Evento cubierto por pólizas de accidentes personales. Es una unidad
+      de negocio distinta del mundo ART y tiene sus propias reglas de
+      cobertura y gestión.
+    pending_to_document:
+      - Modelo de datos específico
+      - Diferencias operativas vs siniestro laboral
+
+  AT:
+    full_name: Accidente de Trabajo
+    definition: Evento súbito y violento ocurrido por hecho o en ocasión del trabajo.
+    srt_resolution: Res. SRT 3326/14 (formato de archivo)
+
+  EP:
+    full_name: Enfermedad Profesional
+    definition: Enfermedad incluida en el listado oficial de enfermedades profesionales.
+    srt_resolution: Res. SRT 3327/14 (formato de archivo)
+
+  in-itinere:
+    definition: >
+      Accidente ocurrido en el trayecto entre el domicilio del trabajador
+      y el lugar de trabajo (o viceversa). Cubierto por la Ley 24.557.
+
+  denuncia:
+    definition: >
+      Registro inicial de un siniestro o accidente ante la ART (o ante la
+      aseguradora de accidentes personales, según corresponda). La denuncia
+      es el "ticket" que dispara todo el flujo posterior.
+
+  # --- Códigos y clasificaciones ---
+
+  CIE-10:
+    full_name: Clasificación Internacional de Enfermedades, 10ª revisión
+    definition: Estándar internacional para codificar diagnósticos.
+
+  CIE-10 trazadora:
+    definition: >
+      Subset de códigos CIE-10 que dispara validaciones especiales en el
+      flujo SRT.
+    known_bug: >
+      En producción, la tabla devuelve códigos de Brucellosis (A23.x) en
+      lugar de los correctos de trauma. Probable fallo en JOIN/filtro, no
+      en los datos. Ver known-bugs.yaml → bug-cie10-trazadora-wrong-codes.
+
+  ROAM:
+    definition: >
+      [PENDIENTE DE VALIDAR — la definición que tenía documentada no era
+      correcta. No usar este término hasta que el equipo confirme qué
+      significa exactamente en el contexto de GRV.]
+    status: pending
+
+  ATEP:
+    definition: >
+      Códigos que clasifican el agente causante o la circunstancia del
+      accidente/enfermedad. [Detalle exacto del esquema pendiente de documentar.]
+
+  ESOP:
+    full_name: Códigos de agentes causantes de EP
+    definition: Listado de códigos definido por Res. SRT 81/19 Anexo III.
+
+  # --- Flujos y procesos ---
+
+  ILT:
+    full_name: Incapacidad Laboral Transitoria
+    definition: >
+      Período en el que el trabajador siniestrado no puede trabajar y la
+      ART debe pagarle una prestación dineraria.
+    regulation: Res. SRT 237/96
+    important: >
+      El día del accidente se cuenta como día trabajado, NO como día de ILT.
+      Se calcula con `ChronoUnit.DAYS.between(LocalDate, LocalDate)`.
+
+  alta-medica:
+    definition: Fin del período de tratamiento, el trabajador puede volver al trabajo.
+
+  nro_siniestro_srt:
+    definition: >
+      Identificador único de 20 caracteres que la ART asigna al siniestro
+      para comunicación con SRT. Estructura: 8 + 4 + 6 + 2.
+    notes: >
+      Construcción atómica mediante `INSERT ON DUPLICATE KEY UPDATE` para
+      evitar race conditions.
+
+  # --- Prestaciones ---
+
+  prestacion:
+    definition: >
+      Servicio que la ART debe brindar al trabajador siniestrado: atención
+      médica, kinesiología, farmacia, traslado, prótesis, rehabilitación.
+
+  autorizacion-medica:
+    definition: >
+      Proceso por el cual la ART autoriza una prestación médica específica
+      (ej: estudios, cirugías). Servicio asociado pendiente de documentar.
+
+  turno:
+    definition: Cita agendada entre el trabajador siniestrado y un prestador.
+
+  traslado:
+    definition: Movimiento del trabajador siniestrado a/desde una prestación.
+
+  # --- Archivos e integraciones SRT ---
+
+  archivo-posicional:
+    definition: >
+      Formato de archivo de ancho fijo (cada campo ocupa N caracteres en
+      una posición fija de la línea). Usado por SRT para intercambio de datos.
+    related: [Res. 3326/14, Res. 3327/14]
+
+  boolToSN:
+    definition: >
+      Función de utilidad que convierte boolean a "S"/"N" para archivos
+      posicionales. Importante: debe manejar null devolviendo " " (espacio),
+      no "N", para no mentir sobre la ausencia de dato.
+
+  # --- Actores externos del negocio ---
+
+  CEM:
+    definition: >
+      [PENDIENTE DE VALIDAR — actor del negocio mencionado en el contexto
+      de ColonIA. Confirmar qué significa con el equipo.]
+    status: pending
+
+  tramitador:
+    definition: >
+      Actor del negocio que tramita casos. Usuario de ColonIA, junto con
+      CEM y la mesa de carga.
+
+  mesa-de-carga:
+    definition: >
+      Equipo/área encargada del ingreso inicial de denuncias en el sistema.
+      Usuario del microfrontend de mesa de carga y de ColonIA.
+
+  # --- Integraciones externas del sistema ---
+
+  Provincia-ART:
+    definition: >
+      Sistema externo con el que la plataforma intercambia datos.
+      [Detalles pendientes de documentar.]
+
+  SGC:
+    definition: >
+      Sistema de Gestión de Casos. [Detalles pendientes de documentar.]
+
+  Satapp:
+    definition: >
+      Plataforma externa para intercambio de archivos AT/EP. Usamos un
+      orquestador (MuleSoft) para la integración.
+
+  SAP-B1:
+    full_name: SAP Business One
+    definition: >
+      ERP del cliente. Integración via ws-sapintegration para facturación
+      y movimientos contables.
+    notes: "Custom UDFs con prefijo `U_GRV_`."
+
+  Moovear:
+    definition: >
+      Proveedor de logística de traslados. Issue histórico: IP whitelisting
+      en AWS (403 resuelto contactando a Moovear).
+
+  # --- Sistemas de IA del cliente ---
+
+  ColonIA:
+    definition: >
+      Chatbot en producción para el cliente. Provee información a CEM,
+      tramitadores y mesa de carga.
+
+  agente-informes-medicos:
+    definition: >
+      Agente en producción para el cliente. Clasifica si un archivo subido
+      a un turno médico es efectivamente un informe médico o si se subió
+      otra cosa.
+
+  # --- Términos de ingeniería ---
+
+  microfrontend:
+    definition: >
+      Componente React desplegado como módulo independiente y compuesto
+      dentro del container-app.
+
+  container-app:
+    definition: >
+      Shell de microfrontends que compone y orquesta los distintos MFEs
+      del sistema. Tecnología exacta pendiente de documentar.
+
+  outbox-pattern:
+    definition: >
+      Patrón para garantizar consistencia entre DB y mensajería. Usado
+      en servicios críticos para evitar race conditions y pérdida de eventos.
+
+  skip-locked:
+    definition: >
+      Feature de MariaDB/MySQL para saltar filas lockeadas en SELECT ... FOR UPDATE.
+      Recomendado para consumers concurrentes del patrón outbox.

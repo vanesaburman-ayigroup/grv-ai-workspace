@@ -1,0 +1,80 @@
+# =============================================================================
+# context/ai-systems.yaml
+# =============================================================================
+# Catálogo de sistemas de IA relevantes para el trabajo del equipo.
+# Separa IA para el cliente (GRV) de IA interna (AYI).
+#
+# Claude debe consultar este archivo cuando aparezcan referencias a
+# "ColonIA", "agente de informes", "análisis de llamadas", o a POCs internos.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# IA para el cliente (GRV) — en producción
+# -----------------------------------------------------------------------------
+
+client_ai_systems:
+
+  - name: ColonIA
+    status: production
+    audience: [CEM, tramitadores, mesa-de-carga]
+    purpose: >
+      Chatbot que provee información operativa a los usuarios del negocio
+      del cliente (CEM, tramitadores y mesa de carga).
+    pending_to_document:
+      - Stack técnico
+      - Fuente de conocimiento (RAG, base de datos, documentos)
+      - Integración con la plataforma principal
+      - Referente del proyecto
+
+  - name: agente-informes-medicos
+    status: production
+    purpose: >
+      Clasifica si un archivo subido a un turno médico es efectivamente
+      un informe médico, o si se subió otra cosa (por error o por
+      manipulación).
+    value: >
+      Evita que documentos irrelevantes contaminen la historia clínica
+      del trabajador siniestrado y reduce carga de revisión manual.
+    pending_to_document:
+      - Stack técnico
+      - Modelo usado (OCR + clasificador, LLM, etc)
+      - Dónde corre, cómo se integra con wsdocumento o con el flujo de turnos
+      - Referente del proyecto
+
+  - name: analisis-metricas-call-center
+    status: production
+    purpose: >
+      Análisis automatizado de métricas sobre las llamadas del call center
+      de la mesa de atención.
+    pending_to_document:
+      - Qué métricas computa exactamente
+      - Frecuencia (batch vs real-time)
+      - Fuentes de datos (grabaciones, transcripciones, metadata)
+      - Referente del proyecto
+
+# -----------------------------------------------------------------------------
+# IA interna (AYI) — POC
+# -----------------------------------------------------------------------------
+
+internal_ai_systems:
+
+  - name: poc-agente-asistencia-interna
+    status: poc
+    purpose: >
+      Prueba de concepto de un agente de asistencia interna para tareas
+      regulatorias y diagnóstico. No está en producción.
+    notes: >
+      Es un experimento interno del equipo de AYI. Conviene mantenerlo
+      separado del workspace grv-ai-workspace (que es para asistir al
+      desarrollo general) para que cada uno evolucione a su ritmo.
+    pending_to_document:
+      - Scope exacto del POC
+      - Stack
+      - Estado actual (qué funciona, qué no)
+      - Referente
+
+# -----------------------------------------------------------------------------
+# Nota para Claude
+# -----------------------------------------------------------------------------
+# Si el usuario menciona un sistema de IA no listado acá, no asumir que
+# existe. Preguntar: "¿Es un sistema nuevo? ¿Lo agregamos a ai-systems.yaml?"

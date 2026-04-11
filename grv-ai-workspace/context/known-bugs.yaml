@@ -1,0 +1,157 @@
+# =============================================================================
+# context/known-bugs.yaml
+# =============================================================================
+# Catálogo de bugs recurrentes o emblemáticos de la plataforma.
+# El skill grv-bugs-conocidos y el agente grv-reviewer consultan este archivo
+# para detectar patrones ("esto huele al bug del retry con @Recover").
+#
+# Cuando un bug se resuelve y es aleccionador, agregarlo acá aunque ya
+# esté fixeado. Sirve como memoria institucional.
+# =============================================================================
+
+bugs:
+
+  - id: bug-logistica-anular-turno
+    title: "anularTurno no ejecuta cancelación completa de traslado programado"
+    status: open
+    services: [wsturnos, wstraslado]
+    root_cause: >
+      En WSTurnos, cuando `findTrasladoProgramado` encuentra un traslado
+      en estado PROGRAMADO, `anularTurno` solo envía un email en lugar de
+      ejecutar la lógica completa de cancelación (endpoint desestimar +
+      liberación del slot).
+    symptoms:
+      - "Traslado queda activo después de anular el turno"
+      - "Agencia recibe email pero el sistema no refleja la cancelación"
+    pattern: "Envío de notificación sin ejecutar la transición de estado correspondiente"
+    detection_hint: >
+      Buscar métodos que envían email/notificación y retornan sin ejecutar
+      la lógica de negocio que debería acompañar la notificación.
+
+  - id: bug-logistica-etiqueta-asignado
+    title: "Traslado queda con etiqueta 1/ASIGNADO después de cancelar"
+    status: open
+    services: [wsturnos, wslogistica]
+    example_case: "traslado ID 2469285"
+    root_cause: >
+      Mecanismo de retry con `@Recover` en WSTurnos silencia el fallo de
+      actualización de etiqueta en WSLogistica. El @Recover captura la
+      excepción y loguea pero no propaga el error, dejando el traslado
+      con etiqueta vieja.
+    symptoms:
+      - "Estado del traslado es CANCELADO pero etiqueta sigue ASIGNADO"
+      - "Planilla muestra traslados cancelados como activos"
+    pattern: "Retry con @Recover que silencia errores sin compensar ni propagar"
+    detection_hint: >
+      Cualquier método con @Recover que no re-lanza, no marca estado de
+      error, y no emite evento de fallo. Es una bomba de tiempo.
+    fix_hint: >
+      @Recover debe: (a) loguear con contexto completo, (b) marcar el
+      registro como inconsistente para reconciliación posterior, (c) emitir
+      evento/métrica.
+
+  - id: bug-hikari-pool-exhaustion
+    title: "Pool de conexiones Hikari exhaustado en múltiples servicios"
+    status: mitigated
+    services: [all-backend]
+    root_cause: >
+      30+ microservicios compartían el límite de 300 conexiones de MariaDB
+      con configuración default de Hikari. Servicios chicos reservaban el
+      mismo pool que servicios críticos.
+    fix: >
+      Estrategia de tiered pool sizing: servicios críticos 20-30,
+      intermedios 10, periféricos 5. Reservar margen para picos.
+    pattern: "Configuración uniforme de recursos sin tiering por criticidad"
+    detection_hint: >
+      Logs con `HikariPool` + `Connection is not available` + `request timed out`.
+
+  - id: bug-lock-wait-auditoria
+    title: "Lock wait timeout en auditoria_facturacion_log"
+    status: open
+    services: [wsauditoriafacturacion, wsauditoriatraslados]
+    root_cause: >
+      Dos servicios escriben concurrentemente a la misma tabla sin
+      coordinación. Uno lockea filas que el otro necesita.
+    recommended_fix: >
+      Outbox pattern + SQS FIFO + SKIP LOCKED para consumers.
+    pattern: "Múltiples servicios escribiendo a la misma tabla sin particionamiento"
+
+  - id: bug-cie10-trazadora-wrong-codes
+    title: "Lookup de CIE-10 trazadora devuelve códigos incorrectos"
+    status: open
+    services: [wssiniestralidad]
+    root_cause: >
+      El sistema devuelve códigos de Brucellosis (A23.x) en lugar de los
+      códigos correctos de trauma. Probable fallo en JOIN o filtro, no
+      en los datos.
+    symptoms:
+      - "Trazadora de trauma dispara con código A23.x"
+    pattern: "Lookup por JOIN que no filtra por contexto del caso"
+    detection_hint: "Revisar queries sobre `config_trazadora_cie10` con múltiples JOINs."
+
+  - id: bug-booltosn-null
+    title: "boolToSN devolvía 'N' para null en archivos posicionales"
+    status: fixed
+    services: [wssiniestralidad]
+    root_cause: >
+      La función utilitaria `boolToSN` asumía que null == false y devolvía
+      "N", pero en archivos SRT eso es mentir sobre la existencia del
+      dato. Debe devolver " " (espacio) para null.
+    fix: "boolToSN retorna ' ' para null, 'S' para true, 'N' para false"
+    pattern: "Coerción de null a valor default perdiendo información"
+
+  - id: bug-campo-alineacion
+    title: "Campos numéricos left-aligned en archivos posicionales"
+    status: fixed
+    services: [wssiniestralidad]
+    root_cause: >
+      La función `campo()` por default alineaba left (como string), pero
+      los campos numéricos en archivos SRT deben estar right-aligned con
+      padding de ceros a la izquierda.
+    pattern: "Función utilitaria con default que no respeta contrato del dominio"
+
+  - id: bug-antiguedad-cast
+    title: "datos_denuncia_srt corrupción con fechas pre-1950"
+    status: fixed
+    services: [wssiniestralidad]
+    root_cause: >
+      `CAST` de antigüedad fallaba para trabajadores con fechas de ingreso
+      anteriores a 1950. El cálculo devolvía valores negativos o NULL
+      que corrompían el registro en `datos_denuncia_srt`.
+    pattern: "Asunciones implícitas sobre rangos de fechas"
+
+  - id: bug-docker-orphaned-containers
+    title: "Contenedores huérfanos en Jenkins"
+    status: fixed
+    services: [jenkins-ci]
+    fix: "Detección basada en network alias para cleanup"
+    pattern: "Reuso de puertos/aliases sin cleanup previo"
+
+  - id: bug-java21-eperm
+    title: "EPERM creating threads en Docker Java 21"
+    status: fixed
+    services: [ws-sapintegration]
+    fix: "--cap-add=SYS_RESOURCE, ulimits, memory a 1024MB"
+    pattern: "Upgrade de runtime sin revisar capabilities del container"
+
+  - id: bug-hook-in-switch
+    title: "React hook llamado dentro de switch statement"
+    status: fixed
+    services: [frontend]
+    root_cause: "Violación de Rules of Hooks — hooks no pueden estar en conditionals"
+    pattern: "Hooks dentro de switch/if/loop"
+    detection_hint: "Linter con rules-of-hooks plugin debería detectarlo"
+
+  - id: bug-non-serializable-redux
+    title: "Estado no serializable en Redux"
+    status: fixed
+    services: [frontend]
+    root_cause: "Moment.js/Date objects en store, no serializables"
+    pattern: "Objetos complejos en Redux sin serialización explícita"
+
+  - id: bug-maxdatehasta-circular
+    title: "Lógica circular en maxDateHasta"
+    status: fixed
+    services: [frontend]
+    root_cause: "Dependencia circular de cálculo de fecha máxima"
+    pattern: "useEffect/useMemo con dependencias que se actualizan mutuamente"

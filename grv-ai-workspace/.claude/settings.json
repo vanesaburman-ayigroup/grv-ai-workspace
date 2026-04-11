@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "workspace": {
+    "name": "grv-ai-workspace",
+    "description": "Plataforma interna de asistencia para desarrollo GRV"
+  },
+  "skills": {
+    "autoload": true,
+    "directories": [
+      "skills/onboarding",
+      "skills/domain",
+      "skills/engineering",
+      "skills/processes"
+    ]
+  },
+  "agents": {
+    "directory": "agents"
+  },
+  "hooks": {
+    "directory": ".claude/hooks",
+    "enabled": [
+      "pre-commit-migration",
+      "pre-commit-secrets",
+      "pre-commit-api-sync",
+      "post-edit-test-check"
+    ]
+  },
+  "context": {
+    "directory": "context",
+    "autoload": [
+      "microservices.yaml",
+      "team.yaml",
+      "glossary.yaml"
+    ]
+  },
+  "defaults": {
+    "mariadb_environment": "dev",
+    "require_explicit_prod_switch": true,
+    "block_write_statements": true,
+    "enforce_limit_on_select": true,
+    "pii_warning": true
+  }
+}

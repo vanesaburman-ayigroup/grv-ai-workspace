@@ -1,0 +1,32 @@
+@startuml
+' =============================================================================
+' Template: C4 diagram (PlantUML con C4-PlantUML)
+' =============================================================================
+' Usar cuando necesitamos exportar a PNG/SVG. Para embebido en markdown,
+' preferir Mermaid (ver skills/engineering/c4-diagrams).
+'
+' Requiere: https://github.com/plantuml-stdlib/C4-PlantUML
+' =============================================================================
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title <Título del diagrama>
+
+' ----- Actores externos -----
+Person(usuario, "Nombre del usuario", "Descripción del rol")
+
+' ----- Sistema / plataforma -----
+System_Boundary(plataforma, "Plataforma GRV") {
+    Container(servicio1, "nombreServicio", "Java/Spring Boot", "Descripción de qué hace")
+    ContainerDb(db, "BD del servicio", "MariaDB (AWS RDS)", "Tablas principales: ...")
+}
+
+' ----- Sistemas externos -----
+System_Ext(externo1, "Nombre sistema externo", "Descripción")
+
+' ----- Relaciones -----
+Rel(usuario, servicio1, "Acción que realiza")
+Rel(servicio1, db, "Reads/Writes", "JDBC")
+Rel(servicio1, externo1, "Qué intercambia", "HTTP/REST")
+
+@enduml

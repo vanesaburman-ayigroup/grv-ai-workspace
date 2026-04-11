@@ -1,0 +1,36 @@
+# Secrets and local config
+.env
+.env.local
+*.secret
+*.key
+*.pem
+
+# Claude Code local state
+.claude/logs/
+.claude/cache/
+.claude/sessions/
+.claude/pending-contributions.yaml
+.claude/user.yaml
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Temporary files
+tmp/
+*.tmp
+*.log
+!docs/**/*.log
+
+# Node / Python (por si alguien corre un script auxiliar)
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/

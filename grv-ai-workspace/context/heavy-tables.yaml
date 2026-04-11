@@ -1,0 +1,49 @@
+# =============================================================================
+# context/heavy-tables.yaml
+# =============================================================================
+# Tablas grandes donde cualquier query requiere confirmación extra del usuario.
+# No es bloqueo: es un "¿seguro? esta tabla es pesada".
+# Usado por el wrapper del MCP de MariaDB.
+# =============================================================================
+
+# Formato:
+#   - name: nombre_tabla
+#     approximate_rows: cantidad estimada
+#     reason: por qué es pesada
+#     recommended_approach: cómo consultarla sin romper nada
+
+heavy_tables:
+
+  - name: datos_denuncia_srt_logs
+    approximate_rows: "millones"
+    reason: "Log de todas las operaciones SRT sobre denuncias. Crece sin parar."
+    recommended_approach: >
+      Siempre con WHERE sobre `fecha` y `id_denuncia`. Evitar full scans.
+      Usar `LIMIT` explícito aunque tengas WHERE.
+
+  - name: auditoria_facturacion_log
+    approximate_rows: "millones"
+    reason: "Log de auditoría de facturación. Tabla de contención (lock wait)."
+    recommended_approach: >
+      Queries de solo lectura con LIMIT y filtrando por período corto.
+
+  - name: siniestros
+    approximate_rows: "cientos de miles"
+    reason: "Tabla principal de siniestros del sistema."
+    recommended_approach: >
+      Filtrar siempre por `fecha_siniestro` o `id_cliente` para acotar.
+
+  - name: denuncias
+    approximate_rows: "cientos de miles"
+    reason: "Tabla principal de denuncias."
+    recommended_approach: "Filtrar por rango de fecha y LIMIT."
+
+  - name: traslados
+    approximate_rows: "cientos de miles"
+    reason: "Todas las solicitudes de traslado, activas e históricas."
+    recommended_approach: "Filtrar por fecha y estado."
+
+  - name: turnos
+    approximate_rows: "cientos de miles"
+    reason: "Histórico completo de turnos médicos."
+    recommended_approach: "Filtrar por fecha y cliente."

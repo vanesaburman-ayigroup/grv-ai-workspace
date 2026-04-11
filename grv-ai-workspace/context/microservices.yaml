@@ -1,0 +1,202 @@
+# =============================================================================
+# context/microservices.yaml
+# =============================================================================
+# Mapa vivo de los microservicios de la plataforma GRV (cliente de AYI).
+#
+# Regla: si un servicio no está documentado acá, Claude NO inventa su
+# existencia, responsabilidad o detalles. Responde "no tengo este servicio
+# mapeado, ¿me lo contás y lo agrego?".
+#
+# Mantenimiento: cuando nace un servicio nuevo o cambia de owner,
+# actualizarlo. Revisión trimestral mínima.
+# =============================================================================
+
+platform: grv-plataforma
+client: GRV (Grupo Río Varadero)
+language_primary: java
+framework_primary: spring-boot
+database: mariadb-on-aws-rds
+
+# Nota sobre convenciones pendientes:
+#   - Naming de servicios backend: heterogéneo por historia del proyecto.
+#     TODO documentar convención actual.
+#   - Naming de microfrontends: pendiente de documentar.
+#     Todos los frontends se componen dentro del container-app.
+
+microservices:
+
+  # ---------------------------------------------------------------------------
+  # Backend — servicios más tocados en el día a día
+  # ---------------------------------------------------------------------------
+
+  - name: wssiniestralidad
+    type: backend
+    stack: [java, spring-boot, mariadb]
+    responsibility: >
+      Gestión de denuncias de siniestros y generación de archivos posicionales
+      para la SRT según Res. 3326/14 (AT) y 3327/14 (EP). Incluye construcción
+      de nro_siniestro_srt y auditoría de envíos.
+    critical_tables: [datos_denuncia_srt_logs, siniestros, denuncias]
+    external_integrations: [srt-portal]
+    known_complexity:
+      - Construcción del nro_siniestro_srt de 20 caracteres (8+4+6+2)
+      - Alineación de campos posicionales (boolToSN, padding)
+      - Lookup de trazadoras CIE-10 (bug abierto)
+    referent: "[BACKEND_REFERENT]"
+
+  - name: wsturnos
+    type: backend
+    stack: [java, spring-boot, mariadb]
+    responsibility: >
+      Gestión de turnos médicos para pacientes siniestrados. Incluye
+      asignación, reprogramación, anulación, y lógica de asignación
+      automática de agencias.
+    critical_tables: [turnos, turnos_historial]
+    depends_on: [wstraslado, wslogistica]
+    known_bugs:
+      - id: bug-logistica-anular-turno
+      - id: bug-logistica-etiqueta-asignado
+    referent: "[LOGISTICS_REFERENT]"
+
+  - name: wstraslado
+    type: backend
+    stack: [java, spring-boot, mariadb]
+    responsibility: >
+      Gestión de traslados de pacientes a consultorios/prestadores. Incluye
+      programación, asignación a agencias, etiquetado de estados.
+    critical_tables: [traslados, traslados_etiquetas]
+    depends_on: [wslogistica]
+    external_integrations: [google-maps, moovear]
+    known_complexity:
+      - Geocoding con Google Maps (issues con "GBA NORTE", Sarmiento, CABA)
+      - IP whitelisting con Moovear
+    referent: "[LOGISTICS_REFERENT]"
+
+  - name: wslogistica
+    type: backend
+    stack: [java, spring-boot, mariadb]
+    responsibility: >
+      Orquestación logística entre turnos, traslados y agencias prestadoras.
+      Maneja planillas, estados, retries.
+    known_complexity:
+      - Mecanismo de retry con @Recover puede silenciar fallos
+    referent: "[LOGISTICS_REFERENT]"
+
+  - name: wsauditoriafacturacion
+    type: backend
+    stack: [java, spring-boot, mariadb]
+    responsibility: >
+      Auditoría de facturación de prestadores. Validación de facturas
+      contra prestaciones brindadas.
+    critical_tables: [auditoria_facturacion_log]
+    known_complexity:
+      - Lock wait timeout en auditoria_facturacion_log (recomendado outbox + SQS FIFO)
+    referent: "[BACKEND_REFERENT]"
+
+  - name: wsauditoriatraslados
+    type: backend
+    stack: [java, spring-boot, mariadb]
+    responsibility: >
+      Auditoría específica de facturación de traslados. Comparte tabla
+      con wsauditoriafacturacion (causa concurrencia).
+    critical_tables: [auditoria_facturacion_log]
+    referent: "[BACKEND_REFERENT]"
+
+  - name: wsdocumento
+    type: backend
+    stack: [java, spring-boot, s3]
+    responsibility: >
+      Gestión documental. Subida, recuperación y clasificación de documentos
+      asociados a denuncias (DNIs, certificados, estudios, etc).
+    referent: "[BACKEND_REFERENT]"
+
+  - name: ws-sapintegration
+    type: backend
+    stack: [java-21, spring-boot, sap-b1]
+    responsibility: >
+      Integración con SAP Business One del cliente. Creación de facturas
+      de compra, actualización de estados, manejo de sesiones SAP,
+      audit logging.
+    external_integrations: [sap-business-one]
+    known_complexity:
+      - Custom UDF prefix `U_GRV_`
+      - Gestión de sesiones SAP
+      - Historial de cert SSL expirado (problema de infra)
+    referent: "[INTEGRATIONS_REFERENT]"
+
+  - name: wssolicitudesgenericas
+    type: backend
+    stack: [java, spring-boot]
+    responsibility: >
+      Handler genérico de solicitudes que no caen en flujos específicos.
+    referent: "[BACKEND_REFERENT]"
+
+  # ---------------------------------------------------------------------------
+  # Frontend — microfrontends compuestos por container-app
+  # ---------------------------------------------------------------------------
+  #
+  # NOTA: los nombres exactos de los microfrontends están pendientes de
+  # documentar. El equipo tiene frontends más nuevos en TypeScript con
+  # Redux Toolkit Query y frontends más viejos en JavaScript sin RTK Query.
+  # Todos se componen dentro del container-app.
+  #
+  # Cuando se documenten los nombres reales, reemplazar los placeholders
+  # `[FRONTEND_NAME_*]` por los nombres verdaderos.
+
+  - name: "[FRONTEND_NAME_MESADECARGA]"
+    type: frontend
+    stack_variant: a-documentar
+    responsibility: >
+      Microfrontend de mesa de carga de denuncias. Incluye componentes
+      de validación reactiva tipo "Drawer Info a Completar".
+    referent: "[FRONTEND_REFERENT]"
+    pending:
+      - Confirmar nombre real del MFE
+      - Confirmar si está en TS con RTK Query o en JS sin RTK Query
+
+  - name: "[FRONTEND_NAME_SOLICITUDES_GENERICAS]"
+    type: frontend
+    stack_variant: a-documentar
+    responsibility: >
+      Frontend de solicitudes genéricas. Históricamente con bundle grande
+      (>6MB) — trabajo en curso para externals y tree-shaking.
+    referent: "[FRONTEND_REFERENT]"
+    pending:
+      - Confirmar nombre real del MFE
+      - Confirmar stack exacto
+
+  - name: "[FRONTEND_NAME_CONTRATACIONES]"
+    type: frontend
+    stack_variant: a-documentar
+    responsibility: >
+      Frontend de contrataciones. Referencia de cómo inyectar credenciales
+      (pattern credentials.js) porque las env vars no se inyectan en build time.
+    referent: "[FRONTEND_REFERENT]"
+    pending:
+      - Confirmar nombre real del MFE
+
+  - name: container-app
+    type: frontend-shell
+    responsibility: >
+      Shell de microfrontends. Orquesta y compone los distintos MFEs.
+    pending:
+      - Documentar tecnología exacta del shell y mecanismo de composición
+    referent: "[FRONTEND_REFERENT]"
+
+# -----------------------------------------------------------------------------
+# Servicios pendientes de mapear
+# -----------------------------------------------------------------------------
+# La plataforma tiene 30+ servicios. Los listados arriba son los más
+# activos. Completar con el resto en las siguientes iteraciones del workspace.
+# -----------------------------------------------------------------------------
+
+pending_to_document:
+  - wsautorizaciones
+  - wsprestaciones
+  - wsprestadores
+  - wscomisionesmedicas
+  - wsnotificaciones
+  - wsreportes
+  - "... (y el resto hasta completar los 30+)"
+  - "Convención de naming de microfrontends"
+  - "Herramienta/proceso exacto de aplicación de migraciones SQL"

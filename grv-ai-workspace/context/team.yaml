@@ -1,0 +1,68 @@
+# =============================================================================
+# context/team.yaml
+# =============================================================================
+# Roles y responsables del equipo GRV sobre la plataforma ART.
+# Usado por Claude para saber a quién atribuir ownership de tickets,
+# sugerir revisores, etc.
+# =============================================================================
+
+team:
+
+  - name: "[OWNER_NAME]"
+    role: tech-lead
+    ownership:
+      - grv-ai-workspace (owner)
+      - arquitectura general de la plataforma
+      - wssiniestralidad (áreas críticas)
+    notes: "Decisión final en temas de arquitectura y scope del workspace."
+
+  - name: "[COMAINTAINER_NAME]"
+    role: developer
+    ownership:
+      - grv-ai-workspace (co-maintainer)
+      - lógica de negocio (siniestros, prestaciones)
+    notes: "Co-mantiene el workspace junto al owner."
+
+  - name: "[BACKEND_REFERENT]"
+    role: backend-developer
+    ownership:
+      - wssiniestralidad (operador SRT de archivos)
+      - flujos de generación de archivos posicionales
+
+  - name: "[DEVOPS_REFERENT]"
+    role: devops
+    ownership:
+      - infraestructura (AWS, Jenkins, Docker)
+      - bases de datos (performance, backups, usuarios)
+      - conexiones de MariaDB dev/prod
+    notes: "Contacto para crear el usuario claude_readonly."
+
+  - name: "[LOGISTICS_REFERENT]"
+    role: backend-developer
+    ownership:
+      - wsturnos, wstraslado, wslogistica
+      - integraciones con agencias y Moovear
+
+  - name: "[INTEGRATIONS_REFERENT]"
+    role: backend-developer
+    ownership:
+      - ws-sapintegration
+      - integraciones con Provincia ART, SGC, Satapp
+
+  - name: "[FRONTEND_REFERENT]"
+    role: frontend-developer
+    ownership:
+      - microfrontends React/TS
+      - single-spa shell
+
+  - name: "[AI_REFERENT]"
+    role: ai-developer
+    ownership:
+      - agente-srt
+      - experimentación con AI tooling
+
+  - name: "[PM_NAME]"
+    role: project-manager
+    ownership:
+      - planning, delivery, stakeholder management
+    notes: "Consumidor principal de reportes generados por granola-to-actions y deploy-post-mortem."

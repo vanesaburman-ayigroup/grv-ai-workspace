@@ -1,0 +1,117 @@
+# =============================================================================
+# context/integrations.yaml
+# =============================================================================
+# Catálogo de integraciones externas de la plataforma GRV/ART.
+# Cada integración tiene: owner, servicios que la consumen, patterns conocidos,
+# gotchas históricos.
+# =============================================================================
+
+integrations:
+
+  - name: SRT (Superintendencia de Riesgos del Trabajo)
+    type: regulatory
+    direction: outbound
+    protocol: file-upload (posicional)
+    consumers: [wssiniestralidad]
+    notes: >
+      Envío de archivos posicionales AT/EP según Res. 3326/14 y 3327/14.
+      No es una API REST — es upload de archivos a un portal. Tolerancia
+      cero a formato incorrecto: un campo mal alineado rebota el archivo
+      completo.
+    referent: "[INTEGRATIONS_REFERENT]"
+
+  - name: Provincia ART
+    type: data-exchange
+    direction: bidirectional
+    protocol: rest-api
+    consumers: [wssiniestralidad, wsprestaciones]
+    notes: >
+      Sistema provincial con el que se intercambian datos de siniestros.
+      Pending to fully document.
+    referent: "[INTEGRATIONS_REFERENT]"
+
+  - name: SGC (Sistema de Gestión de Casos)
+    type: data-exchange
+    direction: bidirectional
+    consumers: [wssiniestralidad]
+    notes: "Sistema externo. Pending to fully document."
+    referent: "[INTEGRATIONS_REFERENT]"
+
+  - name: Satapp
+    type: file-exchange
+    direction: bidirectional
+    protocol: files (AT/EP formats)
+    orchestrator: MuleSoft
+    consumers: [wssiniestralidad]
+    notes: >
+      Plataforma externa de intercambio de archivos. Se orquesta con
+      MuleSoft para manejar los distintos formatos.
+
+  - name: SAP Business One
+    type: erp
+    direction: bidirectional
+    protocol: soap / rest (sap-b1 api)
+    consumers: [ws-sapintegration]
+    udf_prefix: "U_GRV_"
+    notes: >
+      ERP del cliente. Gestión de sesiones explícita. Custom UDFs con
+      prefijo `U_GRV_`. Historial: cert SSL self-signed expiró en jun/2023,
+      problema de infra (no de código).
+    gotchas:
+      - Session management requiere login explícito antes de cada batch
+      - Campo mapping sensitive to SAP schema version
+    referent: "[INTEGRATIONS_REFERENT]"
+
+  - name: Google Maps Geocoding
+    type: geocoding
+    direction: outbound
+    protocol: rest-api
+    consumers: [wstraslado, wslogistica]
+    gotchas:
+      - "'GBA NORTE' no reconocido como location"
+      - "Sarmiento/Chubut geocoding mismatch"
+      - "CABA barrios requieren normalización de dirección"
+      - "API key no se inyecta en build-time del frontend — usar credentials.js pattern como mfe-contrataciones"
+    referent: "[LOGISTICS_REFERENT]"
+
+  - name: Moovear
+    type: logistics-provider
+    direction: outbound
+    protocol: rest-api
+    consumers: [wstraslado]
+    gotchas:
+      - "403 en AWS por IP whitelisting — resuelto contactando a Moovear"
+    referent: "[LOGISTICS_REFERENT]"
+
+  - name: Sentry
+    type: observability
+    direction: outbound
+    consumers: [all-services, all-frontends]
+    notes: "Error tracking. Fuente primaria para deploy-post-mortem skill."
+
+  - name: Microsoft Clarity
+    type: analytics
+    direction: outbound
+    consumers: [all-frontends]
+    notes: "User session analytics. Initialization env-specific con custom user tags."
+
+  - name: Jira
+    type: ticketing
+    direction: bidirectional
+    notes: >
+      Tracker de tickets del equipo. Fuente de verdad principal para
+      functional-test-author skill. Integración futura: MCP de Jira.
+
+  - name: GitLab
+    type: vcs-ci
+    direction: bidirectional
+    notes: >
+      Repos y CI/CD del equipo. Integración futura: GitLab MCP para que
+      el reviewer comente directo en MRs.
+
+  - name: Granola
+    type: meeting-notes
+    direction: inbound
+    mcp: granola
+    consumers: [granola-to-actions, automation-finder]
+    notes: "Transcripciones de reuniones del equipo."
