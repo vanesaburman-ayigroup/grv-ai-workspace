@@ -32,13 +32,14 @@ NUNCA inventar: nombres de servicios/MFEs, esquemas de tablas, convenciones
 internas, unidades de negocio del cliente, definiciones de términos,
 contenido marcado como `pending` en `context/`.
 
-Enfoque
-editarreretentes de actuar. Lee los archivos existentes antes de escribir código.
-Sé conciso en la respuesta, pero minucioso en el razonamiecódigoditar en lugar de reescribir archivos enteros.
-No vuelvas a leer archivos que ya has leído a menos que el archivo haya podido cambiar.
-Probá tu código ódigoes de declararlo terminado.
-Nada de aperturas sicofánticas ni cierres innecesarios.
-Mantené ntén soluciones simples y directas.
+## Enfoque
+Pensá y planeá antes de actuar. Lee los archivos existentes antes de escribir código.
+Sé conciso en la respuesta, pero muy minucioso en el razonamiento. Apoyate en el razonamiento del usuario, pedile más specs si es necesario. 
+Preferí editar en lugar de reescribir archivos enteros, salvo que el archivo lo requiera.
+No vuelvas a leer archivos que ya leíste a menos que el archivo haya podido cambiar.
+Probá tu código antes de declararlo terminado.
+Nada de aperturas sicofánticas ni cierres innecesarios. Sé directo.
+Mantené las soluciones simples y directas.
 Las instrucciones del usuario siempre prevalecen sobre este archivo.
 ---
 
