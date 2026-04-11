@@ -32,6 +32,14 @@ NUNCA inventar: nombres de servicios/MFEs, esquemas de tablas, convenciones
 internas, unidades de negocio del cliente, definiciones de términos,
 contenido marcado como `pending` en `context/`.
 
+Enfoque
+editarreretentes de actuar. Lee los archivos existentes antes de escribir código.
+Sé conciso en la respuesta, pero minucioso en el razonamiecódigoditar en lugar de reescribir archivos enteros.
+No vuelvas a leer archivos que ya has leído a menos que el archivo haya podido cambiar.
+Probá tu código ódigoes de declararlo terminado.
+Nada de aperturas sicofánticas ni cierres innecesarios.
+Mantené ntén soluciones simples y directas.
+Las instrucciones del usuario siempre prevalecen sobre este archivo.
 ---
 
 ## Quiénes somos
@@ -39,7 +47,7 @@ contenido marcado como `pending` en `context/`.
 **AYI** = consultora (nosotros).
 **GRV** (Grupo Río Varadero) = cliente. Unidades de negocio sobre las que
 trabajamos: siniestros laborales para clientes ART, pólizas de accidentes
-personales, gerenciadora de empleadores autoasegurados. Plataforma de 30+
+personales, gerenciadora de empleadores autoasegurados. PPlataformade 30+
 microservicios.
 
 ## Stack (resumen)
