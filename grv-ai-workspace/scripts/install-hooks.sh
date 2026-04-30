@@ -132,31 +132,17 @@ fi
 
 HOOKS_SRC_WIN=$(to_win_path "$HOOKS_SRC")
 
+# Sincronizar .claude/skills/ y .claude/agents/ en el workspace antes de instalar
+bash "$WORKSPACE_DIR/scripts/build-claude-dir.sh"
+
 cat > "$SETTINGS_FILE" << SETTINGS_EOF
 {
   "\$schema": "https://json.schemastore.org/claude-code-settings.json",
   "_managed_by": "grv-ai-workspace — no editar manualmente. Re-ejecutar install-hooks.sh para actualizar.",
   "_workspace": "$WORKSPACE_WIN",
-  "skills": {
-    "autoload": true,
-    "directories": [
-      "$WORKSPACE_WIN/skills/onboarding",
-      "$WORKSPACE_WIN/skills/domain",
-      "$WORKSPACE_WIN/skills/engineering",
-      "$WORKSPACE_WIN/skills/processes"
-    ]
-  },
-  "agents": {
-    "directory": "$WORKSPACE_WIN/agents"
-  },
-  "context": {
-    "directory": "$WORKSPACE_WIN/context",
-    "autoload": [
-      "microservices.yaml",
-      "team.yaml",
-      "glossary.yaml"
-    ]
-  },
+  "additionalDirectories": [
+    "$WORKSPACE_WIN"
+  ],
   "hooks": {
     "PreToolUse": [
       {
