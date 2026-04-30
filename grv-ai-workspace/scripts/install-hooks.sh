@@ -19,9 +19,23 @@ set -euo pipefail
 WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET_REPO="${1:-$(git -C "$WORKSPACE_DIR" rev-parse --show-toplevel 2>/dev/null || echo "$WORKSPACE_DIR")}"
 
+# En Windows (Git Bash / MSYS2), pwd devuelve /c/Users/... pero Claude Code
+# necesita C:/Users/... (paths nativos Windows). cygpath -m hace esa conversión.
+# En Linux/Mac, cygpath no existe y usamos los paths tal cual.
+to_win_path() {
+  if command -v cygpath &>/dev/null; then
+    cygpath -m "$1"
+  else
+    echo "$1"
+  fi
+}
+
+WORKSPACE_WIN=$(to_win_path "$WORKSPACE_DIR")
+TARGET_WIN=$(to_win_path "$TARGET_REPO")
+
 echo "📦 GRV AI Workspace — Instalador"
-echo "   Workspace:    $WORKSPACE_DIR"
-echo "   Repo destino: $TARGET_REPO"
+echo "   Workspace:    $WORKSPACE_WIN"
+echo "   Repo destino: $TARGET_WIN"
 echo ""
 
 if [ ! -d "$TARGET_REPO/.git" ]; then
@@ -116,25 +130,27 @@ if [[ -f "$SETTINGS_FILE" ]]; then
   fi
 fi
 
+HOOKS_SRC_WIN=$(to_win_path "$HOOKS_SRC")
+
 cat > "$SETTINGS_FILE" << SETTINGS_EOF
 {
   "\$schema": "https://json.schemastore.org/claude-code-settings.json",
   "_managed_by": "grv-ai-workspace — no editar manualmente. Re-ejecutar install-hooks.sh para actualizar.",
-  "_workspace": "$WORKSPACE_DIR",
+  "_workspace": "$WORKSPACE_WIN",
   "skills": {
     "autoload": true,
     "directories": [
-      "$WORKSPACE_DIR/skills/onboarding",
-      "$WORKSPACE_DIR/skills/domain",
-      "$WORKSPACE_DIR/skills/engineering",
-      "$WORKSPACE_DIR/skills/processes"
+      "$WORKSPACE_WIN/skills/onboarding",
+      "$WORKSPACE_WIN/skills/domain",
+      "$WORKSPACE_WIN/skills/engineering",
+      "$WORKSPACE_WIN/skills/processes"
     ]
   },
   "agents": {
-    "directory": "$WORKSPACE_DIR/agents"
+    "directory": "$WORKSPACE_WIN/agents"
   },
   "context": {
-    "directory": "$WORKSPACE_DIR/context",
+    "directory": "$WORKSPACE_WIN/context",
     "autoload": [
       "microservices.yaml",
       "team.yaml",
@@ -145,53 +161,53 @@ cat > "$SETTINGS_FILE" << SETTINGS_EOF
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/pre-edit-secrets.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/pre-edit-secrets.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/pre-tool-branch-guard.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/pre-tool-branch-guard.sh\""}]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-migration-check.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-edit-migration-check.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-api-sync.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-edit-api-sync.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-test-check.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-edit-test-check.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-test-suggestion.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-edit-test-suggestion.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-pii-in-logs.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-edit-pii-in-logs.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-changelog-suggest.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-edit-changelog-suggest.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-tool-auto-format.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-tool-auto-format.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-tool-cost-tracker.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-tool-cost-tracker.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-tool-feature-workflow.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-tool-feature-workflow.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-tool-sound-alert.sh\""}]
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC_WIN/post-tool-sound-alert.sh\""}]
       }
     ]
   },
@@ -218,16 +234,15 @@ CLAUDE_MD="$TARGET_REPO/CLAUDE.md"
 if [[ ! -f "$CLAUDE_MD" ]]; then
   cat > "$CLAUDE_MD" << CLAUDE_EOF
 <!-- grv-ai-workspace stub — podés agregar instrucciones específicas del proyecto debajo -->
-@$WORKSPACE_DIR/CLAUDE.md
+@$WORKSPACE_WIN/CLAUDE.md
 CLAUDE_EOF
   echo "✅ CLAUDE.md stub creado (importa instrucciones del workspace)"
 else
-  # Ya existe — chequear si ya tiene el import
-  if grep -q "$WORKSPACE_DIR/CLAUDE.md" "$CLAUDE_MD" 2>/dev/null; then
+  if grep -q "grv-ai-workspace" "$CLAUDE_MD" 2>/dev/null; then
     echo "ℹ️  CLAUDE.md ya tiene el import del workspace"
   else
     echo "ℹ️  CLAUDE.md ya existe — no se modificó. Para importar el workspace agregá:"
-    echo "     @$WORKSPACE_DIR/CLAUDE.md"
+    echo "     @$WORKSPACE_WIN/CLAUDE.md"
   fi
 fi
 
@@ -236,7 +251,7 @@ fi
 # ─────────────────────────────────────────────────────────────
 
 echo ""
-echo "✅ Instalación completa en: $TARGET_REPO"
+echo "✅ Instalación completa en: $TARGET_WIN"
 echo ""
 echo "Skills disponibles al abrir Claude Code desde el proyecto:"
 echo "  Engineering : adr-helper, api-design-review, api-doc-sync, architecture-patterns,"
@@ -257,7 +272,7 @@ echo "  grv-architect, grv-doc-keeper, grv-domain-expert, grv-migration-guard,"
 echo "  grv-process-analyst, grv-reviewer, grv-tech-lead, grv-test-author"
 echo ""
 echo "Sound alerts (opt-in):"
-echo "  Activar:  bash \"$HOOKS_SRC/post-tool-sound-alert.sh\" on"
-echo "  Estado:   bash \"$HOOKS_SRC/post-tool-sound-alert.sh\" status"
+echo "  Activar:  bash \"$HOOKS_SRC_WIN/post-tool-sound-alert.sh\" on"
+echo "  Estado:   bash \"$HOOKS_SRC_WIN/post-tool-sound-alert.sh\" status"
 echo ""
 echo "Abrí Claude Code desde $TARGET_REPO y todo estará disponible."
