@@ -145,53 +145,53 @@ cat > "$SETTINGS_FILE" << SETTINGS_EOF
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/pre-edit-secrets.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/pre-edit-secrets.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/pre-tool-branch-guard.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/pre-tool-branch-guard.sh\""}]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-edit-migration-check.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-migration-check.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-edit-api-sync.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-api-sync.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-edit-test-check.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-test-check.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-edit-test-suggestion.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-test-suggestion.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-edit-pii-in-logs.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-pii-in-logs.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-edit-changelog-suggest.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-edit-changelog-suggest.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-tool-auto-format.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-tool-auto-format.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-tool-cost-tracker.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-tool-cost-tracker.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-tool-feature-workflow.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-tool-feature-workflow.sh\""}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash \"$HOOKS_SRC/post-tool-sound-alert.sh\""
+        "hooks": [{"type": "command", "command": "bash \"$HOOKS_SRC/post-tool-sound-alert.sh\""}]
       }
     ]
   },

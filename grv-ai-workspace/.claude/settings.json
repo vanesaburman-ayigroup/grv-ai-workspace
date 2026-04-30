@@ -20,53 +20,53 @@
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/pre-edit-secrets.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/pre-edit-secrets.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/pre-tool-branch-guard.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/pre-tool-branch-guard.sh"}]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-edit-migration-check.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-edit-migration-check.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-edit-api-sync.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-edit-api-sync.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-edit-test-check.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-edit-test-check.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-edit-test-suggestion.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-edit-test-suggestion.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-edit-pii-in-logs.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-edit-pii-in-logs.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-edit-changelog-suggest.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-edit-changelog-suggest.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-tool-auto-format.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-tool-auto-format.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-tool-cost-tracker.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-tool-cost-tracker.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-tool-feature-workflow.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-tool-feature-workflow.sh"}]
       },
       {
         "matcher": "Edit|Write",
-        "command": "bash .claude/hooks/post-tool-sound-alert.sh"
+        "hooks": [{"type": "command", "command": "bash .claude/hooks/post-tool-sound-alert.sh"}]
       }
     ]
   },
