@@ -233,6 +233,41 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────
+# PARTE 4 — .claude/commands/
+#           Copia cada skill como slash command del proyecto
+#           (el mecanismo que Claude Code sí descubre via /)
+# ─────────────────────────────────────────────────────────────
+
+COMMANDS_DIR="$TARGET_REPO/.claude/commands"
+mkdir -p "$COMMANDS_DIR"
+
+# Copiar SKILL.md como command file, stripeando el frontmatter YAML
+install_skill_as_command() {
+  local skill_file="$1"
+  local skill_name="$2"
+  awk 'BEGIN{n=0} /^---$/{n++; if(n==2){found=1}; next} found{print}' "$skill_file" \
+    > "$COMMANDS_DIR/${skill_name}.md"
+}
+
+for dir in "$WORKSPACE_DIR/skills/engineering/"*/; do
+  name=$(basename "$dir")
+  [ -f "$dir/SKILL.md" ] && install_skill_as_command "$dir/SKILL.md" "$name"
+done
+for dir in "$WORKSPACE_DIR/skills/domain/"*/; do
+  name=$(basename "$dir")
+  [ -f "$dir/SKILL.md" ] && install_skill_as_command "$dir/SKILL.md" "$name"
+done
+for dir in "$WORKSPACE_DIR/skills/processes/"*/; do
+  name=$(basename "$dir")
+  [ -f "$dir/SKILL.md" ] && install_skill_as_command "$dir/SKILL.md" "$name"
+done
+[ -f "$WORKSPACE_DIR/skills/onboarding/SKILL.md" ] && \
+  install_skill_as_command "$WORKSPACE_DIR/skills/onboarding/SKILL.md" "grv-onboarding"
+
+cmd_count=$(ls "$COMMANDS_DIR" | wc -l)
+echo "✅ $cmd_count slash commands instalados en .claude/commands/ (invocables con /nombre)"
+
+# ─────────────────────────────────────────────────────────────
 # RESUMEN
 # ─────────────────────────────────────────────────────────────
 
