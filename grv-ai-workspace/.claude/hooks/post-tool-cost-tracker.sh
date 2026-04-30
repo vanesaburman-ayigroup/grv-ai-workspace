@@ -70,17 +70,19 @@ try:
 except Exception:
     payload = {"raw": raw[:500]}
 
-def find_number(value, names):
+def find_number(value, names, depth=0):
+    if depth > 12:
+        return None
     if isinstance(value, dict):
         for key, item in value.items():
             if key in names and isinstance(item, (int, float)):
                 return item
-            found = find_number(item, names)
+            found = find_number(item, names, depth + 1)
             if found is not None:
                 return found
     elif isinstance(value, list):
         for item in value:
-            found = find_number(item, names)
+            found = find_number(item, names, depth + 1)
             if found is not None:
                 return found
     return None

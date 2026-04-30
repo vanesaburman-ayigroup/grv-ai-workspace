@@ -22,7 +22,13 @@ if [[ ! -d "$GIT_HOOKS_DIR" ]]; then
   exit 1
 fi
 
-chmod +x "$HOOKS_DIR"/*.sh
+HOOK_SCRIPTS=("$HOOKS_DIR"/*.sh)
+if [[ ! -e "${HOOK_SCRIPTS[0]}" ]]; then
+  echo "❌ No hay scripts .sh en $HOOKS_DIR."
+  exit 1
+fi
+
+chmod +x "${HOOK_SCRIPTS[@]}"
 
 install_wrapper() {
   local hook_name="$1"
