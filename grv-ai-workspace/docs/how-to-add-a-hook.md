@@ -100,6 +100,11 @@ cuando están listados en `.claude/settings.json`.
 | `post-tool-cost-tracker` | PostTool | observability | Registra eventos y tokens/costos si Claude Code los expone en `.claude/logs/cost-tracker.jsonl`. Resumen: `.claude/hooks/post-tool-cost-tracker.sh summary`. |
 | `post-tool-sound-alert` | PostTool / comando | opt-in | Reproduce sonidos cortos para atención, finalización, plan, skill y subagente. |
 
+Para estimaciones de costo, `post-tool-cost-tracker` acepta las variables
+opcionales `GRV_COST_INPUT_USD_PER_MTOK` y `GRV_COST_OUTPUT_USD_PER_MTOK`
+(USD por millón de tokens). Si no están definidas, solo registra tokens y
+costos explícitamente reportados por Claude Code.
+
 ## Sound alerts
 
 El hook de sonido está desactivado por default para no sorprender al equipo.

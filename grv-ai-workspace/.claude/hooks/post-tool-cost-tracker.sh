@@ -100,6 +100,8 @@ reported_cost = find_number(payload, {"cost_usd", "total_cost_usd"})
 if total_tokens is None and (input_tokens is not None or output_tokens is not None):
     total_tokens = (input_tokens or 0) + (output_tokens or 0)
 
+# Optional USD-per-million-token rates used only when Claude Code does not
+# report an explicit cost in the hook payload.
 input_rate = float(os.environ.get("GRV_COST_INPUT_USD_PER_MTOK", "0") or "0")
 output_rate = float(os.environ.get("GRV_COST_OUTPUT_USD_PER_MTOK", "0") or "0")
 estimated_cost = None

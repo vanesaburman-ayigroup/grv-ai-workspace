@@ -78,9 +78,6 @@ def collect_text(value, depth=0):
         for key in ("status", "message", "event", "event_name", "reason", "tool_name", "tool"):
             if key in value:
                 collect_text(value[key], depth + 1)
-        for key, item in value.items():
-            if key not in {"status", "message", "event", "event_name", "reason", "tool_name", "tool"}:
-                collect_text(item, depth + 1)
     elif isinstance(value, list):
         for item in value:
             collect_text(item, depth + 1)
