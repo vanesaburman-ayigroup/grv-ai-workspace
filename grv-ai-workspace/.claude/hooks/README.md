@@ -5,18 +5,34 @@ Están pensados para ser rápidos, accionables y silenciosos cuando no aplican.
 
 ## Instalación
 
-Desde la raíz del workspace:
+Para instalar en un proyecto (git hooks + hooks de Claude Code):
 
 ```bash
-scripts/install-hooks.sh
+# En el proyecto actual:
+bash /ruta/al/workspace/scripts/install-hooks.sh
+
+# En otro repo:
+bash /ruta/al/workspace/scripts/install-hooks.sh /ruta/al/proyecto
 ```
 
-El instalador:
+El instalador hace dos cosas:
 
-- marca los scripts `.claude/hooks/*.sh` como ejecutables;
-- crea/actualiza `.git/hooks/pre-commit`;
-- ejecuta todos los hooks `pre-commit-*.sh` locales;
-- hace backup de un hook preexistente si no fue gestionado por este workspace.
+**1. Git hooks** (en `.git/hooks/` del proyecto):
+- `pre-commit` — secrets, migraciones, API sync, TypeScript quality, TODOs, OpenAPI sync
+- `commit-msg` — valida formato Conventional Commits
+
+**2. Claude Code hooks** (crea `.claude/settings.json` en el proyecto):
+- PreToolUse: `pre-edit-secrets`, `pre-tool-branch-guard`
+- PostToolUse: `post-edit-migration-check`, `post-edit-api-sync`, `post-edit-test-check`,
+  `post-edit-test-suggestion`, `post-edit-pii-in-logs`, `post-edit-changelog-suggest`,
+  `post-tool-auto-format`, `post-tool-cost-tracker`, `post-tool-feature-workflow`,
+  `post-tool-sound-alert`
+
+Los paths en el `.claude/settings.json` generado son **absolutos** al workspace,
+así que funcionan aunque abras Claude Code desde el directorio del proyecto.
+
+Hace backup automático si ya existía un `.git/hooks/pre-commit` o `.claude/settings.json`
+no gestionado por el workspace.
 
 Los hooks `pre-tool-*`, `post-tool-*` y `post-edit-*` los ejecuta Claude Code
 cuando están listados en `.claude/settings.json`.
