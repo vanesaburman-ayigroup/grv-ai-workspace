@@ -67,7 +67,26 @@ except (json.JSONDecodeError, TypeError, ValueError):
     payload = {}
 
 tool = (payload.get("tool_name") or payload.get("tool") or "").lower()
-message = json.dumps(payload, ensure_ascii=False).lower()
+messages = []
+
+def collect_text(value, depth=0):
+    if depth > 8:
+        return
+    if isinstance(value, str):
+        messages.append(value.lower())
+    elif isinstance(value, dict):
+        for key in ("status", "message", "event", "event_name", "reason", "tool_name", "tool"):
+            if key in value:
+                collect_text(value[key], depth + 1)
+        for key, item in value.items():
+            if key not in {"status", "message", "event", "event_name", "reason", "tool_name", "tool"}:
+                collect_text(item, depth + 1)
+    elif isinstance(value, list):
+        for item in value:
+            collect_text(item, depth + 1)
+
+collect_text(payload)
+message = " ".join(messages)
 
 if "skill" in tool or "skill" in message:
     print("skill")

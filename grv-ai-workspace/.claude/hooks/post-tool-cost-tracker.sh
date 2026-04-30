@@ -62,7 +62,10 @@ import json
 import os
 import sys
 
-MAX_RECURSION_DEPTH = 12
+try:
+    MAX_RECURSION_DEPTH = int(os.environ.get("GRV_COST_TRACKER_MAX_DEPTH", "12"))
+except ValueError:
+    MAX_RECURSION_DEPTH = 12
 
 log_file = sys.argv[1]
 raw = os.environ.get("PAYLOAD", "")

@@ -54,17 +54,20 @@ except (json.JSONDecodeError, TypeError, ValueError):
     payload = {}
 
 paths = []
+MAX_DEPTH = 12
 
-def walk(value):
+def walk(value, depth=0):
+    if depth > MAX_DEPTH:
+        return
     if isinstance(value, dict):
         for key, item in value.items():
             if key in {"file_path", "path"} and isinstance(item, str):
                 paths.append(item)
             else:
-                walk(item)
+                walk(item, depth + 1)
     elif isinstance(value, list):
         for item in value:
-            walk(item)
+            walk(item, depth + 1)
 
 walk(payload)
 for path in dict.fromkeys(paths):

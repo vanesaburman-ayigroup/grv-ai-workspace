@@ -35,10 +35,14 @@ install_wrapper() {
   local pattern="$2"
   local target="$GIT_HOOKS_DIR/$hook_name"
 
-  if [[ -f "$target" ]] && ! grep -q "grv-ai-workspace managed hook" "$target"; then
-    local backup="$target.grv-backup.$(date +%Y%m%d%H%M%S)"
-    cp "$target" "$backup"
-    echo "ℹ️  Backup de hook existente: $backup"
+  if [[ -f "$target" ]]; then
+    if grep -q "grv-ai-workspace managed hook" "$target"; then
+      echo "ℹ️  Actualizando hook gestionado existente: .git/hooks/$hook_name"
+    else
+      local backup="$target.grv-backup.$(date +%Y%m%d%H%M%S)"
+      cp "$target" "$backup"
+      echo "ℹ️  Backup de hook existente: $backup"
+    fi
   fi
 
   cat > "$target" <<EOF
