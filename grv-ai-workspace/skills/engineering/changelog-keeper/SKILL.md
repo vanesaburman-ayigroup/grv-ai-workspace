@@ -61,6 +61,30 @@ fechas: `[2026-04-10]`.
 el skill pregunta al autor en lugar de completar. Un changelog con
 información inventada es peor que uno incompleto.
 
+## Detección de breaking changes
+
+Cruzar con `api-doc-sync` o `openapi-validator` cuando el diff incluye cambios en endpoints o DTOs. Si se detecta:
+- Campo removido de un response → entry `### Breaking Changes` con instrucciones de migración
+- Endpoint deprecado → entry `### Deprecated` con fecha de fin de soporte
+- Formato: `⚠️ BREAKING: <descripción>. Migración: <qué hacer>.`
+
+## Template de release notes orientadas al cliente
+
+Cuando el PM pide "¿qué hay de nuevo en este release?", usar este formato (más accesible que el Keep a Changelog técnico):
+
+```markdown
+## Release <versión> — <fecha>
+
+### Novedades
+- <feature en lenguaje de negocio, sin jerga técnica>
+
+### Correcciones
+- <bug fix en términos del impacto al usuario>
+
+### ⚠️ Cambios importantes (requieren acción)
+- <si hay breaking change: qué debe hacer el consumer>
+```
+
 ## Output
 
 ```markdown
@@ -122,5 +146,5 @@ que sí pude interpretar.
 ## TODO para promover a beta
 
 - [ ] Integración con GitLab MCP para leer MRs directamente.
-- [ ] Detección de breaking changes a partir de cambios en DTOs o
-      eliminación de endpoints (cruzar con `api-doc-sync`).
+- [ ] Detección de breaking changes a partir de cambios en DTOs o eliminación de endpoints (cruzar con `api-doc-sync` y `openapi-validator`).
+- [ ] Caso de estudio documentado de un release real con el template de release notes.

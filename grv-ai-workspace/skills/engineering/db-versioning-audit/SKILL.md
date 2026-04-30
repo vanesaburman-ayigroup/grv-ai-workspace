@@ -20,9 +20,7 @@ Auditar el versionado de base de datos de un servicio: qué migraciones
 SQL están en el repo, qué se aplicó en dev, qué se aplicó en prod, y
 detectar drift.
 
-**Nota importante**: no usamos Flyway. El proceso exacto de tracking de
-migraciones está pendiente de documentar. Este skill se adapta al proceso
-real una vez confirmado — por ahora, compara por conteo y por contenido.
+**Nota importante**: no usamos Flyway. El proceso de tracking de migraciones varía por servicio. Este skill pregunta cómo trackea cada servicio antes de auditar (ver sección "Información que pido"). Cuando el equipo confirme la herramienta estándar, este skill se actualizará para integrarla automáticamente (ver TODO).
 
 ## Cuándo usarme
 

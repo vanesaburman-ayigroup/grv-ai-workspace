@@ -17,12 +17,37 @@
     "directory": "agents"
   },
   "hooks": {
-    "directory": ".claude/hooks",
-    "enabled": [
-      "pre-commit-migration",
-      "pre-commit-secrets",
-      "pre-commit-api-sync",
-      "post-edit-test-check"
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/pre-edit-secrets.sh"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-edit-migration-check.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-edit-api-sync.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-edit-test-check.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-edit-test-suggestion.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-edit-pii-in-logs.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-edit-changelog-suggest.sh"
+      }
     ]
   },
   "context": {

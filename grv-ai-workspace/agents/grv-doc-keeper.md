@@ -14,7 +14,9 @@ cuando detecta drift.
 
 ## Skills que carga
 
-- `skills/engineering/api-doc-sync`
+- `skills/engineering/api-doc-sync` (para detectar drift entre código y anotaciones existentes)
+- `skills/engineering/openapi-from-scratch` (para servicios sin Swagger: genera openapi.yaml desde el código)
+- `skills/engineering/openapi-validator` (para validar openapi.yaml con reglas GRV)
 - `skills/engineering/changelog-keeper`
 - `skills/engineering/c4-diagrams`
 - `skills/engineering/db-versioning-audit`

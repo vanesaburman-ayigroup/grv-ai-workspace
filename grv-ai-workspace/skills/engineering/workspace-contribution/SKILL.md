@@ -49,6 +49,7 @@ las LTs.
 - **Referencias regulatorias** → agrega a `context/regulations.yaml`
 - **Bugs nuevos** → agrega a `context/known-bugs.yaml`
 - **Integraciones** → completa o agrega en `context/integrations.yaml`
+- **Decisiones arquitectónicas** (tipo `architectural-decision`) → propone como ADR en `docs/adr/NNN-titulo.md` + notifica al co-maintainer para review. Usa `templates/adr-template.md` como base.
 
 ### ❌ NO puede capturar (requieren MR manual)
 

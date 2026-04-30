@@ -96,6 +96,17 @@ Voy sección por sección. Cualquier ítem que no aplica, lo marco como N/A.
 - [ ] **Tablas compartidas**: casos como `auditoria_facturacion_log` (compartida entre `wsauditoriafacturacion` y `wsauditoriatraslados`) requieren coordinación. Ver `bug-lock-wait-auditoria` en `known-bugs.yaml`.
 - [ ] **Hikari pool**: si la migración introduce queries lentas, puede agotar el pool. Evaluar timing.
 
+#### Checklist adicional para `auditoria_facturacion_log`
+
+Esta tabla tiene historial de lock wait en producción (ver `bug-lock-wait-auditoria` en `known-bugs.yaml`). Cualquier migración que la toque requiere:
+
+- [ ] `ALGORITHM=INPLACE, LOCK=NONE` verificado en dev antes de aplicar (y confirmado que la versión de MariaDB lo soporta para este tipo de cambio)
+- [ ] El cambio no introduce nueva escritura en el INSERT path principal (si hay INSERT frecuente + lock = desastre)
+- [ ] Revisado con `database-design-heavy-table` para la estrategia de cambio
+- [ ] Coordinación con el equipo owner de `wsauditoriafacturacion` (son consumers de esta tabla)
+- [ ] Ventana de mantenimiento recomendada si el cambio no es online
+- [ ] Plan de rollback específico para esta tabla documentado antes del deploy
+
 ### 6. PII y datos sensibles
 
 - [ ] **¿Toca columnas con PII?** (DNI, nombre, dirección, historia clínica). Si sí, extra cuidado con backups y logs.

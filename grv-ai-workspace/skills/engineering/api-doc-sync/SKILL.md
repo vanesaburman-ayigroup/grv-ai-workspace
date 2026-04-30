@@ -4,7 +4,7 @@ version: v1
 maturity: alpha
 owner: "[BACKEND_REFERENT]"
 category: engineering
-related_skills: [spring-boot-review, changelog-keeper]
+related_skills: [spring-boot-review, changelog-keeper, openapi-from-scratch, openapi-validator]
 related_agents: [grv-doc-keeper]
 triggers:
   - "usuario modificó un controller Spring Boot"
@@ -77,9 +77,22 @@ SUGERENCIAS DE ACTUALIZACIÓN
   [bloques de código con las anotaciones corregidas]
 ```
 
+## Modo standalone (openapi.yaml sin anotaciones)
+
+Para servicios que **no tienen anotaciones Swagger/springdoc**, este skill no aplica directamente. En ese caso:
+
+1. Usá `openapi-from-scratch` para generar el `openapi.yaml` leyendo los controllers.
+2. Luego usá `openapi-validator` para validar el resultado.
+3. Una vez que existe el `openapi.yaml`, este skill puede detectar drift entre el archivo y el código.
+
+**Detección de springdoc vs swagger-core** — verificar en `pom.xml`:
+- `org.springdoc:springdoc-openapi-starter-webmvc-ui` → springdoc (moderno)
+- `io.swagger.core.v3:swagger-annotations` → swagger-core legacy
+- Ninguno de los dos → sin Swagger, ir a `openapi-from-scratch`
+
 ## Límites
 
-- No genera el archivo OpenAPI desde cero si no hay anotaciones.
+- No genera el archivo OpenAPI desde cero si no hay anotaciones → usá `openapi-from-scratch`.
 - Asume que el proyecto usa springdoc-openapi o similar. Si usa otra
   herramienta, el skill necesita adaptación.
 - No valida semánticamente que los ejemplos sean coherentes con los schemas.

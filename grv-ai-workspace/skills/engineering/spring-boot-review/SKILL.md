@@ -119,6 +119,18 @@ criterios de aceptación, no puedo evaluar si el código hace lo correcto.
 - [ ] **Graceful shutdown**: si procesa mensajes, debe drenar antes de bajar.
 - [ ] **Idempotencia en operaciones expuestas a reintentos** (HTTP retries, SQS visibility timeout, etc).
 
+### 11. Observabilidad
+
+- [ ] **Logs JSON estructurados**: no concatenar strings en mensajes de log. Usar `{}` placeholders de SLF4J o MDC fields.
+- [ ] **MDC con contexto de negocio**: campos como `siniestroId`, `traceId`, `usuarioId` en el MDC para correlacionar logs.
+- [ ] **Niveles de log correctos**: ERROR para excepciones inesperadas, WARN para degradación/fallback, INFO para eventos de negocio. DEBUG solo en desarrollo, no en producción.
+- [ ] **Sin PII en logs**: DNI, nombre, domicilio, historia clínica NO van en logs. Usar IDs internos. Ver `context/sensitive-tables.yaml`.
+- [ ] **Métricas Micrometer**: si el código expone comportamiento crítico (procesamiento de lotes, colas, operaciones costosas), considerar agregar un `Counter` o `Timer` custom.
+- [ ] **Sentry**: excepciones inesperadas deben llegar a Sentry con contexto relevante (sin PII). Excepciones de negocio esperadas (404, 400) no deben ir a Sentry.
+- [ ] **Actuator**: verificar que `/actuator/health` y `/actuator/metrics` están habilitados si el servicio es nuevo.
+
+Ver `skills/engineering/observability-blueprint` para el blueprint completo de instrumentación.
+
 ## Flujo del skill
 
 1. Pedir código completo + contexto de negocio.

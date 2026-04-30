@@ -23,11 +23,55 @@ Plan de adopción del workspace `grv-ai-workspace` dentro del equipo GRV.
 - [ ] Clonar localmente, configurar `.env`, probar MCPs.
 - [ ] Primer commit `v0.1.0` del workspace.
 
+---
+
+## Ampliación v0.2.0 — Cobertura arquitectos y tech leads (2026-04-29) ✅
+
+> **Completado**. Esta expansión extiende el workspace para cubrir los flujos de
+> arquitectos y tech leads, además de mejorar la cobertura de testing y OpenAPI.
+
+**Skills nuevos** (todos alpha):
+- `unit-test-author`, `test-coverage-strategy` — testing unitario puro (Java + TypeScript)
+- `openapi-from-scratch`, `openapi-validator` — generación y validación de specs OpenAPI 3.0
+- `adr-helper`, `architecture-patterns`, `api-design-review`, `observability-blueprint`,
+  `database-design-heavy-table` — toolkit del arquitecto
+- `tech-debt-audit`, `release-readiness`, `cross-team-impact`, `incident-command`,
+  `sprint-planning-impact` — toolkit del tech lead
+
+**Agentes nuevos**: `grv-architect`, `grv-tech-lead`
+
+**Templates**: JUnit5, Jest, Object Mother (Java), factories (TypeScript), OpenAPI skeleton,
+release readiness checklist, tech debt entry, incident runbook
+
+**Prompts**: architecture-tradeoff, endpoint-design, tech-debt-prioritization,
+onboarding-tech-deep, breaking-change-evaluation
+
+**Hooks nuevos** (PostToolUse + commit-msg): post-edit-test-suggestion,
+post-edit-pii-in-logs, post-edit-changelog-suggest, pre-commit-conventional-commits,
+pre-commit-todo-orphan, pre-commit-openapi-sync
+
+**Infraestructura**: `scripts/install-hooks.sh`, `.pre-commit-config.yaml`
+
+**Skills mejorados**: `spring-boot-review` (observabilidad), `mariadb-migration-review`
+(checklist auditoria_facturacion_log), `changelog-keeper` (breaking changes + release notes),
+`c4-diagrams` (ejemplos Context/Container/Component), `workspace-contribution` (ADRs)
+
+**Pendiente de Fase 1 ampliación** (verificación end-to-end):
+- [ ] Probar `openapi-from-scratch` en un servicio real sin Swagger annotations
+- [ ] Generar tests con `unit-test-author` para `calcularDiasILT`
+- [ ] Producir 1 ADR real con `adr-helper`
+- [ ] Aplicar `release-readiness` en 1 release real
+- [ ] Verificar que Tier 1 hooks no generan falsos positivos en repos reales
+- [ ] MCPs pendientes: GitLab MCP + Sentry MCP (`.claude/mcp.json`, `.env.example`)
+- [ ] Confirmar herramienta de aplicación de migraciones SQL (reemplazar TODO en `CLAUDE.md`)
+
+---
+
 ## Fase 1 — Dogfooding (semana 1)
 
 **Usuarios**: `[OWNER_NAME]`, `[COMAINTAINER_NAME]`.
 
-**Tareas reales a pasar por el workspace**:
+**Tareas reales a pasar por el workspace** (v0.1.0 skills):
 
 - Al menos 2 migraciones SQL → `mariadb-migration-review`
 - Al menos 2 MRs de Spring Boot → `spring-boot-review` + agente `grv-reviewer`
@@ -35,6 +79,13 @@ Plan de adopción del workspace `grv-ai-workspace` dentro del equipo GRV.
 - Al menos 1 tanda de tests → `functional-test-author`
 - Al menos 1 consulta de dominio → `grv-domain-expert`
 - Al menos 1 reunión transcrita → `granola-to-actions`
+
+**Tareas adicionales v0.2.0** (skills de arquitecto y LT):
+
+- Al menos 1 decisión de diseño documentada → `adr-helper`
+- Al menos 1 endpoint nuevo diseñado → `api-design-review` + prompt `endpoint-design.md`
+- Al menos 1 servicio sin Swagger → `openapi-from-scratch` → `openapi-validator`
+- Al menos 1 pre-release real → `release-readiness`
 
 **Output esperado**: primer case study en `docs/case-studies/001-<nombre>.md`
 con antes/después, qué funcionó, qué no.

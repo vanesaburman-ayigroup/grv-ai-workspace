@@ -1,60 +1,62 @@
 #!/usr/bin/env bash
 # -----------------------------------------------------------------------------
-# post-edit-test-check.sh
+# post-edit-test-check.sh — Claude Code PostToolUse hook (Edit|Write)
 # -----------------------------------------------------------------------------
-# Se dispara después de que Claude edita un archivo de test. Verifica
-# señales de anti-patrones: tests que testean implementación en lugar
-# de comportamiento.
-#
-# Señales de alerta:
-# - Mocks excesivos (> 5 en un solo test)
-# - Asserts sobre métodos privados (verify en mocks internos)
-# - Tests que matchean la implementación literal (nombres tipo "verify X calls Y")
-# - Ausencia de given/when/then o equivalente
-#
-# Warn mode. No bloquea.
+# Advierte sobre señales de tests acoplados a implementación después de
+# editar un archivo de test. No bloquea.
 # -----------------------------------------------------------------------------
 
 set -euo pipefail
 
-FILE="${1:-}"
+INPUT=$(cat)
 
-if [[ -z "$FILE" ]]; then
+PYTHON=$(command -v python 2>/dev/null || command -v python3 2>/dev/null || echo "")
+if [[ -z "$PYTHON" ]]; then
+  exit 0
+fi
+
+FILE_PATH=$($PYTHON -c "
+import sys, json
+d = json.load(sys.stdin).get('tool_input', {})
+print(d.get('file_path', ''))
+" <<< "$INPUT" 2>/dev/null || echo "")
+
+if [[ -z "$FILE_PATH" ]]; then
   exit 0
 fi
 
 # Solo archivos de test
-if [[ ! "$FILE" =~ (Test|Spec|\.test\.|\.spec\.) ]]; then
+if ! echo "$FILE_PATH" | grep -qE '(Test|Spec|\.test\.|\.spec\.)' 2>/dev/null; then
+  exit 0
+fi
+
+if [[ ! -f "$FILE_PATH" ]]; then
   exit 0
 fi
 
 WARNINGS=()
 
 # Contar mocks (Java/Mockito)
-MOCK_COUNT=$(grep -cE '@Mock|mock\(|Mockito\.when|Mockito\.verify' "$FILE" 2>/dev/null || echo 0)
+MOCK_COUNT=$(grep -cE '@Mock|mock\(|Mockito\.when|Mockito\.verify' "$FILE_PATH" 2>/dev/null || echo 0)
 if [[ $MOCK_COUNT -gt 8 ]]; then
   WARNINGS+=("Alto número de mocks ($MOCK_COUNT). Posible test de implementación.")
 fi
 
 # Falta de estructura given/when/then o arrange/act/assert
-if ! grep -qiE '// ?given|// ?when|// ?then|// ?arrange|// ?act|// ?assert' "$FILE"; then
+if ! grep -qiE '// ?given|// ?when|// ?then|// ?arrange|// ?act|// ?assert' "$FILE_PATH" 2>/dev/null; then
   WARNINGS+=("No se detectó estructura given/when/then o arrange/act/assert.")
 fi
 
 # Assertions sobre internals
-if grep -qE 'verify\(.*\)\.(get|set|is|has)[A-Z]' "$FILE"; then
+if grep -qE 'verify\(.*\)\.(get|set|is|has)[A-Z]' "$FILE_PATH" 2>/dev/null; then
   WARNINGS+=("Verificaciones sobre getters/setters. Posible test acoplado a implementación.")
 fi
 
 if [[ ${#WARNINGS[@]} -gt 0 ]]; then
-  echo ""
-  echo "⚠️  grv-ai-workspace: señales de test acoplado a implementación en $FILE"
+  echo "Señales de test acoplado a implementación en $(basename "$FILE_PATH"):"
   for w in "${WARNINGS[@]}"; do
-    echo "   - $w"
+    echo "  - $w"
   done
-  echo ""
-  echo "   Ver: skills/engineering/functional-test-author"
-  echo ""
 fi
 
 exit 0
