@@ -69,7 +69,7 @@ raw = os.environ.get("PAYLOAD", "")
 
 try:
     payload = json.loads(raw) if raw.strip() else {}
-except json.JSONDecodeError:
+except (json.JSONDecodeError, TypeError, ValueError):
     payload = {"raw": raw[:500]}
 
 def find_number(value, names, depth=0):

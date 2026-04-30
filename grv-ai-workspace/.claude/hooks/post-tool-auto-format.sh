@@ -27,7 +27,7 @@ import os
 
 try:
     payload = json.loads(os.environ.get("PAYLOAD", ""))
-except json.JSONDecodeError:
+except (json.JSONDecodeError, TypeError, ValueError):
     payload = {}
 
 print(payload.get("tool_name") or payload.get("tool") or "")
@@ -50,7 +50,7 @@ import os
 
 try:
     payload = json.loads(os.environ.get("PAYLOAD", ""))
-except json.JSONDecodeError:
+except (json.JSONDecodeError, TypeError, ValueError):
     payload = {}
 
 paths = []
