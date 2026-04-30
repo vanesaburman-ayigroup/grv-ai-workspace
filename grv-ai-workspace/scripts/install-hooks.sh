@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
 # scripts/install-hooks.sh
-# Instala los git hooks Y los hooks de Claude Code en el repositorio objetivo.
+# Instala el workspace GRV en un repositorio de proyecto.
 #
 # Uso:
 #   bash scripts/install-hooks.sh                    # instala en el repo actual
 #   bash scripts/install-hooks.sh /path/to/repo      # instala en otro repo
 #
 # Qué instala:
-#   1. .git/hooks/pre-commit y .git/hooks/commit-msg  — hooks de git
-#   2. .claude/settings.json en el repo destino       — hooks de Claude Code (PostToolUse/PreToolUse)
+#   1. .git/hooks/pre-commit y commit-msg  — git hooks
+#   2. .claude/settings.json               — hooks Claude Code + skills + agentes + contexto
+#   3. CLAUDE.md (stub)                    — importa el CLAUDE.md del workspace
 #
-# Los hooks de Claude Code usan rutas absolutas al workspace para funcionar
-# independientemente de desde dónde se abra Claude Code.
+# Después de esto podés abrir Claude Code desde el directorio del proyecto
+# y tener disponibles todos los skills, agentes, hooks y contexto del workspace.
 
 set -euo pipefail
 
 WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET_REPO="${1:-$(git -C "$WORKSPACE_DIR" rev-parse --show-toplevel 2>/dev/null || echo "$WORKSPACE_DIR")}"
 
-echo "📦 GRV AI Workspace — Instalador de hooks"
+echo "📦 GRV AI Workspace — Instalador"
 echo "   Workspace:    $WORKSPACE_DIR"
 echo "   Repo destino: $TARGET_REPO"
 echo ""
 
-# Verificar que el target es un repo git
 if [ ! -d "$TARGET_REPO/.git" ]; then
   echo "❌ $TARGET_REPO no es un repositorio git."
   exit 1
@@ -37,7 +37,6 @@ if [[ ! -d "$HOOKS_SRC" ]]; then
   exit 1
 fi
 
-# Hacer ejecutables todos los hook scripts
 chmod +x "$HOOKS_SRC"/*.sh 2>/dev/null || true
 
 # ─────────────────────────────────────────────────────────────
@@ -65,11 +64,11 @@ install_dispatcher() {
 
   if [[ -f "$target" ]]; then
     if grep -q "grv-ai-workspace managed hook" "$target" 2>/dev/null; then
-      echo "ℹ️  Actualizando hook gestionado existente: .git/hooks/$hook_name"
+      echo "ℹ️  Actualizando git hook: .git/hooks/$hook_name"
     else
       local backup="$target.grv-backup.$(date +%Y%m%d%H%M%S)"
       cp "$target" "$backup"
-      echo "ℹ️  Backup de hook existente guardado en: $backup"
+      echo "ℹ️  Backup de hook existente: $backup"
     fi
   fi
 
@@ -92,13 +91,14 @@ install_dispatcher() {
 }
 
 install_dispatcher "pre-commit" "${PRE_COMMIT_HOOKS[@]}"
-echo "✅ Git hook pre-commit instalado (${#PRE_COMMIT_HOOKS[@]} scripts)"
+echo "✅ Git hook pre-commit (${#PRE_COMMIT_HOOKS[@]} scripts)"
 
 install_dispatcher "commit-msg" "${COMMIT_MSG_HOOKS[@]}"
-echo "✅ Git hook commit-msg instalado (${#COMMIT_MSG_HOOKS[@]} scripts)"
+echo "✅ Git hook commit-msg (${#COMMIT_MSG_HOOKS[@]} scripts)"
 
 # ─────────────────────────────────────────────────────────────
-# PARTE 2 — Claude Code hooks (.claude/settings.json)
+# PARTE 2 — .claude/settings.json
+#           Hooks Claude Code + skills + agentes + contexto
 # ─────────────────────────────────────────────────────────────
 
 CLAUDE_DIR="$TARGET_REPO/.claude"
@@ -106,24 +106,41 @@ SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 
 mkdir -p "$CLAUDE_DIR"
 
-# Si ya existe un settings.json gestionado por el workspace, lo actualiza.
-# Si existe uno custom (no gestionado), hace backup.
 if [[ -f "$SETTINGS_FILE" ]]; then
   if grep -q "grv-ai-workspace" "$SETTINGS_FILE" 2>/dev/null; then
-    echo "ℹ️  Actualizando .claude/settings.json gestionado existente"
+    echo "ℹ️  Actualizando .claude/settings.json"
   else
     local_backup="$SETTINGS_FILE.grv-backup.$(date +%Y%m%d%H%M%S)"
     cp "$SETTINGS_FILE" "$local_backup"
-    echo "ℹ️  Backup de settings.json existente guardado en: $local_backup"
+    echo "ℹ️  Backup de settings.json existente: $local_backup"
   fi
 fi
 
-# Genera settings.json con rutas absolutas al workspace
 cat > "$SETTINGS_FILE" << SETTINGS_EOF
 {
   "\$schema": "https://json.schemastore.org/claude-code-settings.json",
   "_managed_by": "grv-ai-workspace — no editar manualmente. Re-ejecutar install-hooks.sh para actualizar.",
   "_workspace": "$WORKSPACE_DIR",
+  "skills": {
+    "autoload": true,
+    "directories": [
+      "$WORKSPACE_DIR/skills/onboarding",
+      "$WORKSPACE_DIR/skills/domain",
+      "$WORKSPACE_DIR/skills/engineering",
+      "$WORKSPACE_DIR/skills/processes"
+    ]
+  },
+  "agents": {
+    "directory": "$WORKSPACE_DIR/agents"
+  },
+  "context": {
+    "directory": "$WORKSPACE_DIR/context",
+    "autoload": [
+      "microservices.yaml",
+      "team.yaml",
+      "glossary.yaml"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -177,11 +194,42 @@ cat > "$SETTINGS_FILE" << SETTINGS_EOF
         "command": "bash \"$HOOKS_SRC/post-tool-sound-alert.sh\""
       }
     ]
+  },
+  "defaults": {
+    "mariadb_environment": "dev",
+    "require_explicit_prod_switch": true,
+    "block_write_statements": true,
+    "enforce_limit_on_select": true,
+    "pii_warning": true
   }
 }
 SETTINGS_EOF
 
-echo "✅ .claude/settings.json instalado con hooks de Claude Code"
+echo "✅ .claude/settings.json (skills + agentes + contexto + hooks)"
+
+# ─────────────────────────────────────────────────────────────
+# PARTE 3 — CLAUDE.md stub
+#           Si el proyecto no tiene CLAUDE.md, crea uno que
+#           importa el del workspace. Si ya tiene uno, no lo toca.
+# ─────────────────────────────────────────────────────────────
+
+CLAUDE_MD="$TARGET_REPO/CLAUDE.md"
+
+if [[ ! -f "$CLAUDE_MD" ]]; then
+  cat > "$CLAUDE_MD" << CLAUDE_EOF
+<!-- grv-ai-workspace stub — podés agregar instrucciones específicas del proyecto debajo -->
+@$WORKSPACE_DIR/CLAUDE.md
+CLAUDE_EOF
+  echo "✅ CLAUDE.md stub creado (importa instrucciones del workspace)"
+else
+  # Ya existe — chequear si ya tiene el import
+  if grep -q "$WORKSPACE_DIR/CLAUDE.md" "$CLAUDE_MD" 2>/dev/null; then
+    echo "ℹ️  CLAUDE.md ya tiene el import del workspace"
+  else
+    echo "ℹ️  CLAUDE.md ya existe — no se modificó. Para importar el workspace agregá:"
+    echo "     @$WORKSPACE_DIR/CLAUDE.md"
+  fi
+fi
 
 # ─────────────────────────────────────────────────────────────
 # RESUMEN
@@ -190,23 +238,26 @@ echo "✅ .claude/settings.json instalado con hooks de Claude Code"
 echo ""
 echo "✅ Instalación completa en: $TARGET_REPO"
 echo ""
-echo "Git hooks:"
-echo "  pre-commit : ${PRE_COMMIT_HOOKS[*]}"
-echo "  commit-msg : ${COMMIT_MSG_HOOKS[*]}"
+echo "Skills disponibles al abrir Claude Code desde el proyecto:"
+echo "  Engineering : adr-helper, api-design-review, api-doc-sync, architecture-patterns,"
+echo "                c4-diagrams, changelog-keeper, database-design-heavy-table,"
+echo "                db-versioning-audit, functional-test-author, mariadb-migration-review,"
+echo "                observability-blueprint, openapi-from-scratch, openapi-validator,"
+echo "                react-mfe-review, spring-boot-review, test-coverage-strategy,"
+echo "                unit-test-author, workspace-contribution"
+echo "  Domain      : grv-arquitectura-plataforma, grv-autorizaciones-medicas,"
+echo "                grv-bugs-conocidos, grv-facturacion, grv-glosario, grv-prestaciones,"
+echo "                grv-provincia-art, grv-regulaciones-srt, grv-satapp, grv-sgc,"
+echo "                grv-siniestros, grv-turnos-logistica"
+echo "  Processes   : cross-team-impact, incident-command, release-readiness,"
+echo "                sprint-planning-impact, tech-debt-audit"
 echo ""
-echo "Claude Code hooks (PostToolUse):"
-echo "  post-edit-migration-check, post-edit-api-sync, post-edit-test-check"
-echo "  post-edit-test-suggestion, post-edit-pii-in-logs, post-edit-changelog-suggest"
-echo "  post-tool-auto-format, post-tool-cost-tracker, post-tool-feature-workflow"
-echo "  post-tool-sound-alert"
-echo ""
-echo "Claude Code hooks (PreToolUse):"
-echo "  pre-edit-secrets, pre-tool-branch-guard"
+echo "Agentes disponibles:"
+echo "  grv-architect, grv-doc-keeper, grv-domain-expert, grv-migration-guard,"
+echo "  grv-process-analyst, grv-reviewer, grv-tech-lead, grv-test-author"
 echo ""
 echo "Sound alerts (opt-in):"
-echo "  Activar:    bash \"$HOOKS_SRC/post-tool-sound-alert.sh\" on"
-echo "  Desactivar: bash \"$HOOKS_SRC/post-tool-sound-alert.sh\" off"
-echo "  Estado:     bash \"$HOOKS_SRC/post-tool-sound-alert.sh\" status"
+echo "  Activar:  bash \"$HOOKS_SRC/post-tool-sound-alert.sh\" on"
+echo "  Estado:   bash \"$HOOKS_SRC/post-tool-sound-alert.sh\" status"
 echo ""
-echo "Abrí Claude Code desde $TARGET_REPO para que los hooks de Claude Code estén activos."
-echo "Documentación: $WORKSPACE_DIR/.claude/hooks/README.md"
+echo "Abrí Claude Code desde $TARGET_REPO y todo estará disponible."
