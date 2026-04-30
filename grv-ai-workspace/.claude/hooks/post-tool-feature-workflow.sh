@@ -16,7 +16,10 @@ if [[ "$DISABLED" == "true" ]] || [[ "$DISABLED" == "1" ]]; then
   exit 0
 fi
 
-PAYLOAD="$(cat || true)"
+PAYLOAD=""
+if [[ ! -t 0 ]]; then
+  PAYLOAD="$(cat || true)"
+fi
 
 should_emit() {
   case "$COMMAND" in
