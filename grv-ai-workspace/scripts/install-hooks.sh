@@ -241,12 +241,13 @@ fi
 COMMANDS_DIR="$TARGET_REPO/.claude/commands"
 mkdir -p "$COMMANDS_DIR"
 
-# Copiar SKILL.md como command file, stripeando el frontmatter YAML
+# Copiar SKILL.md como command en subdirectorio commands/<name>/SKILL.md
+# El frontmatter se mantiene completo para que Claude Code lo use.
 install_skill_as_command() {
   local skill_file="$1"
   local skill_name="$2"
-  awk 'BEGIN{n=0} /^---$/{n++; if(n==2){found=1}; next} found{print}' "$skill_file" \
-    > "$COMMANDS_DIR/${skill_name}.md"
+  mkdir -p "$COMMANDS_DIR/$skill_name"
+  cp "$skill_file" "$COMMANDS_DIR/$skill_name/SKILL.md"
 }
 
 for dir in "$WORKSPACE_DIR/skills/engineering/"*/; do
