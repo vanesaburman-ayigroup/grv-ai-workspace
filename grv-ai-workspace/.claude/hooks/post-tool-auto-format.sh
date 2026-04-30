@@ -54,7 +54,10 @@ except (json.JSONDecodeError, TypeError, ValueError):
     payload = {}
 
 paths = []
-MAX_DEPTH = 12
+try:
+    MAX_DEPTH = int(os.environ.get("GRV_HOOK_MAX_DEPTH", "12"))
+except ValueError:
+    MAX_DEPTH = 12
 
 def walk(value, depth=0):
     if depth > MAX_DEPTH:

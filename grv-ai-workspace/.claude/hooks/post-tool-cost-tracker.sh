@@ -63,7 +63,7 @@ import os
 import sys
 
 try:
-    MAX_RECURSION_DEPTH = int(os.environ.get("GRV_COST_TRACKER_MAX_DEPTH", "12"))
+    MAX_RECURSION_DEPTH = int(os.environ.get("GRV_HOOK_MAX_DEPTH", os.environ.get("GRV_COST_TRACKER_MAX_DEPTH", "12")))
 except ValueError:
     MAX_RECURSION_DEPTH = 12
 

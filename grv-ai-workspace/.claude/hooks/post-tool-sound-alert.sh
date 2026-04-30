@@ -68,9 +68,13 @@ except (json.JSONDecodeError, TypeError, ValueError):
 
 tool = (payload.get("tool_name") or payload.get("tool") or "").lower()
 messages = []
+try:
+    max_depth = int(os.environ.get("GRV_HOOK_MAX_DEPTH", "12"))
+except ValueError:
+    max_depth = 12
 
 def collect_text(value, depth=0):
-    if depth > 8:
+    if depth > max_depth:
         return
     if isinstance(value, str):
         messages.append(value.lower())

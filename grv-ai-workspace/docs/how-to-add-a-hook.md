@@ -105,6 +105,9 @@ opcionales `GRV_COST_INPUT_USD_PER_MTOK` y `GRV_COST_OUTPUT_USD_PER_MTOK`
 (USD por millón de tokens). Si no están definidas, solo registra tokens y
 costos explícitamente reportados por Claude Code.
 
+Los parsers de payload de hooks usan `GRV_HOOK_MAX_DEPTH` (default `12`) para
+evitar recursión excesiva en payloads anidados.
+
 ## Sound alerts
 
 El hook de sonido está desactivado por default para no sorprender al equipo.
