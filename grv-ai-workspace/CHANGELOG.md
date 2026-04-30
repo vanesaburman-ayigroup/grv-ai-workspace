@@ -74,6 +74,31 @@ Versionado según SemVer liviano (ver `GOVERNANCE.md`).
 
 ## [Unreleased]
 
+### Hooks
+- **`.claude/hooks/README.md`** nuevo: guía de instalación, uso,
+  formateadores, typecheck/lint, sound alerts y checklist de cierre de feature.
+- **`pre-commit-typescript-quality`** nuevo: ejecuta scripts existentes
+  `lint` y `typecheck` cuando hay TypeScript staged; warn por default y
+  blocking opcional con `GRV_TS_CHECK_MODE=block`.
+- **`post-tool-feature-workflow`** nuevo: checklist de cierre de feature con
+  reminders para TypeScript, `mariadb-migration-review`, `changelog-keeper` y
+  `/plan` cuando queden pasos abiertos.
+- **`post-tool-auto-format`** actualizado: suma `google-java-format` para
+  servicios Java y explicita Prettier para React/TypeScript.
+- **`post-tool-sound-alert`** documentado con explicación de eventos y sonidos.
+- **`pre-tool-branch-guard`** nuevo: guardrail PreTool para advertir o
+  bloquear cambios de Claude Code en ramas protegidas.
+- **`post-tool-auto-format`** nuevo: PostTool que ejecuta formateadores ya
+  instalados sobre archivos editados por Claude.
+- **`post-tool-cost-tracker`** nuevo: PostTool de observabilidad que registra
+  uso/tokens/costos reportados por Claude Code y permite ver un resumen local.
+- **`post-tool-sound-alert`** nuevo: alertas sonoras opt-in para atención,
+  fin de tarea, fin de plan, skills y subagentes, con comandos on/off/status.
+- **`scripts/install-hooks.sh`** nuevo: instalador shell para wrappers de hooks
+  Git locales.
+- **`docs/how-to-add-a-hook.md`** actualizado con guía de instalación,
+  hooks PreTool/PostTool y comandos de sound alerts.
+
 ### Optimización de tokens
 - **`CLAUDE.md` adelgazado** de ~1.370 palabras a ~570 (58% menos).
   Se mantuvo lo esencial operativo y se movió el contexto extendido a

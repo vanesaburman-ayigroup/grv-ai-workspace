@@ -21,6 +21,10 @@
       {
         "matcher": "Edit|Write",
         "command": "bash .claude/hooks/pre-edit-secrets.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/pre-tool-branch-guard.sh"
       }
     ],
     "PostToolUse": [
@@ -47,6 +51,22 @@
       {
         "matcher": "Edit|Write",
         "command": "bash .claude/hooks/post-edit-changelog-suggest.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-tool-auto-format.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-tool-cost-tracker.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-tool-feature-workflow.sh"
+      },
+      {
+        "matcher": "Edit|Write",
+        "command": "bash .claude/hooks/post-tool-sound-alert.sh"
       }
     ]
   },
