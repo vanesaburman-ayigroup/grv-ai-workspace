@@ -22,10 +22,12 @@
       "pre-commit-migration",
       "pre-commit-secrets",
       "pre-commit-api-sync",
+      "pre-commit-typescript-quality",
       "post-edit-test-check",
       "pre-tool-branch-guard",
       "post-tool-auto-format",
       "post-tool-cost-tracker",
+      "post-tool-feature-workflow",
       "post-tool-sound-alert"
     ]
   },

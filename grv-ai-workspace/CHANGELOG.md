@@ -8,6 +8,17 @@ Versionado según SemVer liviano (ver `GOVERNANCE.md`).
 ## [Unreleased]
 
 ### Hooks
+- **`.claude/hooks/README.md`** nuevo: guía de instalación, uso,
+  formateadores, typecheck/lint, sound alerts y checklist de cierre de feature.
+- **`pre-commit-typescript-quality`** nuevo: ejecuta scripts existentes
+  `lint` y `typecheck` cuando hay TypeScript staged; warn por default y
+  blocking opcional con `GRV_TS_CHECK_MODE=block`.
+- **`post-tool-feature-workflow`** nuevo: checklist de cierre de feature con
+  reminders para TypeScript, `mariadb-migration-review`, `changelog-keeper` y
+  `/plan` cuando queden pasos abiertos.
+- **`post-tool-auto-format`** actualizado: suma `google-java-format` para
+  servicios Java y explicita Prettier para React/TypeScript.
+- **`post-tool-sound-alert`** documentado con explicación de eventos y sonidos.
 - **`pre-tool-branch-guard`** nuevo: guardrail PreTool para advertir o
   bloquear cambios de Claude Code en ramas protegidas.
 - **`post-tool-auto-format`** nuevo: PostTool que ejecuta formateadores ya
