@@ -60,7 +60,7 @@ def walk(value, depth=0):
 walk(payload)
 text = " ".join(texts)
 feature = re.search(r"\b(feature|implementaci[oó]n|funcionalidad)\b", text)
-done = re.search(r"\b(done|complete|completed|finished|terminad[oa]|implementad[oa])\b", text)
+done = re.search(r"\b(done|complete|completed|finished|terminad[oa]s?|implementad[oa]s?|finalizad[oa]s?)\b", text)
 sys.exit(0 if feature and done else 1)
 PY
 }

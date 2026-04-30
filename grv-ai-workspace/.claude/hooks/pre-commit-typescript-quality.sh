@@ -57,17 +57,34 @@ fi
 has_script() {
   local root="$1"
   local script="$2"
+  local output
+  local status
 
-  python3 - "$root/package.json" "$script" <<'PY' >/dev/null 2>&1
+  set +e
+  output="$(
+    python3 - "$root/package.json" "$script" 2>&1 <<'PY'
 import json
 import sys
 
-with open(sys.argv[1], encoding="utf-8") as fh:
-    package = json.load(fh)
+try:
+    with open(sys.argv[1], encoding="utf-8") as fh:
+        package = json.load(fh)
+except Exception as exc:
+    print(f"No se pudo leer {sys.argv[1]}: {exc}", file=sys.stderr)
+    sys.exit(2)
 
 scripts = package.get("scripts") or {}
 sys.exit(0 if sys.argv[2] in scripts else 1)
 PY
+  )"
+  status=$?
+  set -e
+
+  if [[ $status -eq 2 ]]; then
+    echo "⚠️  grv-ai-workspace: $output"
+  fi
+
+  return "$status"
 }
 
 run_script() {
