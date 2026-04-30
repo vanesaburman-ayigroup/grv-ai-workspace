@@ -62,16 +62,18 @@ import json
 import os
 import sys
 
+MAX_RECURSION_DEPTH = 12
+
 log_file = sys.argv[1]
 raw = os.environ.get("PAYLOAD", "")
 
 try:
     payload = json.loads(raw) if raw.strip() else {}
-except Exception:
+except json.JSONDecodeError:
     payload = {"raw": raw[:500]}
 
 def find_number(value, names, depth=0):
-    if depth > 12:
+    if depth > MAX_RECURSION_DEPTH:
         return None
     if isinstance(value, dict):
         for key, item in value.items():
