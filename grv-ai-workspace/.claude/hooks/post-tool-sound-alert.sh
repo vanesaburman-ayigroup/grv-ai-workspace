@@ -43,6 +43,7 @@ case "$COMMAND" in
     echo "true" > "$STATE_FILE"
     COMMAND="play"
     shift || true
+    EVENT="${1:-complete}"
     ;;
 esac
 
@@ -54,7 +55,7 @@ PAYLOAD="$(cat || true)"
 EVENT="${2:-${GRV_SOUND_EVENT:-}}"
 
 if [[ "$COMMAND" == "play" ]]; then
-  EVENT="${2:-complete}"
+  EVENT="${EVENT:-${2:-complete}}"
 elif [[ -z "$EVENT" ]] && [[ -n "$PAYLOAD" ]] && command -v python3 >/dev/null 2>&1; then
   EVENT="$(PAYLOAD="$PAYLOAD" python3 - <<'PY' 2>/dev/null || true
 import json

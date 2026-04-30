@@ -7,9 +7,10 @@
 
 set -euo pipefail
 
-ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-HOOKS_DIR="$ROOT/.claude/hooks"
-GIT_HOOKS_DIR="$ROOT/.git/hooks"
+WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+GIT_ROOT="$(git -C "$WORKSPACE_ROOT" rev-parse --show-toplevel 2>/dev/null || echo "$WORKSPACE_ROOT")"
+HOOKS_DIR="$WORKSPACE_ROOT/.claude/hooks"
+GIT_HOOKS_DIR="$GIT_ROOT/.git/hooks"
 
 if [[ ! -d "$HOOKS_DIR" ]]; then
   echo "❌ No existe $HOOKS_DIR. Ejecutar desde la raíz del workspace."
@@ -39,8 +40,7 @@ install_wrapper() {
 # grv-ai-workspace managed hook
 set -euo pipefail
 
-ROOT="\$(git rev-parse --show-toplevel)"
-HOOKS_DIR="\$ROOT/.claude/hooks"
+HOOKS_DIR="$HOOKS_DIR"
 
 for hook in "\$HOOKS_DIR"/$pattern; do
   [[ -x "\$hook" ]] || continue
