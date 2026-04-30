@@ -22,7 +22,11 @@
       "pre-commit-migration",
       "pre-commit-secrets",
       "pre-commit-api-sync",
-      "post-edit-test-check"
+      "post-edit-test-check",
+      "pre-tool-branch-guard",
+      "post-tool-auto-format",
+      "post-tool-cost-tracker",
+      "post-tool-sound-alert"
     ]
   },
   "context": {
