@@ -11,6 +11,7 @@
 .claude/sessions/
 .claude/pending-contributions.yaml
 .claude/user.yaml
+.claude/settings.local.json
 
 # Editor
 .vscode/

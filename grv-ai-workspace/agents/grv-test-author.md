@@ -14,7 +14,9 @@ que rompe si no hay fuente de verdad.
 
 ## Skills que carga
 
-- `skills/engineering/functional-test-author`
+- `skills/engineering/functional-test-author` (tests que validan comportamiento contra spec)
+- `skills/engineering/unit-test-author` (tests unitarios puros con aislamiento de dependencias)
+- `skills/engineering/test-coverage-strategy` (decidir qué nivel de test usar para cada caso)
 - `skills/domain/grv-glosario` (para entender términos de dominio en specs)
 - `skills/domain/grv-regulaciones-srt` (para tests que involucran reglas SRT)
 

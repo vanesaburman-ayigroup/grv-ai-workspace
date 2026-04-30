@@ -8,7 +8,20 @@ Este documento define cómo evoluciona el workspace `grv-ai-workspace`.
 - **Co-maintainer**: `[COMAINTAINER_NAME]` — review de MRs, gestión del día a día.
 - **Contributors**: cualquier miembro del equipo GRV. Ver `context/team.yaml`.
 
-Cada skill, agente y hook tiene un **referente** declarado en su propio archivo (campo `owner:` del frontmatter). El referente es quien responde dudas, revisa PRs que tocan ese componente y decide si promover nivel de madurez.
+### Referentes por área (v0.2.0+)
+
+Además del owner/co-maintainer, cada área de contenido tiene un referente técnico:
+
+| Área | Referente | Skills/agentes bajo su responsabilidad |
+|------|-----------|----------------------------------------|
+| Migraciones y base de datos | `[DEVOPS_REFERENT]` | `mariadb-migration-review`, `db-versioning-audit`, `database-design-heavy-table`, `grv-migration-guard` |
+| Arquitectura y diseño | `[ARCHITECT_REFERENT]` | `adr-helper`, `architecture-patterns`, `api-design-review`, `observability-blueprint`, `c4-diagrams`, `grv-architect` |
+| Tech lead / procesos | `[TECH_LEAD_REFERENT]` | `tech-debt-audit`, `release-readiness`, `cross-team-impact`, `incident-command`, `sprint-planning-impact`, `grv-tech-lead` |
+| Backend / testing | `[BACKEND_REFERENT]` | `spring-boot-review`, `unit-test-author`, `test-coverage-strategy`, `functional-test-author`, `grv-reviewer`, `grv-test-author` |
+| Frontend | `[FRONTEND_REFERENT]` | `react-mfe-review`, `grv-reviewer` |
+| API y documentación | `[BACKEND_REFERENT]` | `openapi-from-scratch`, `openapi-validator`, `api-doc-sync`, `changelog-keeper`, `grv-doc-keeper` |
+
+Cada skill/agente/hook declara su `owner:` en el frontmatter. El referente de área actúa como owner por defecto cuando ese campo dice `[OWNER_NAME]` hasta que se asigne un responsable específico.
 
 ## Niveles de madurez
 
@@ -49,6 +62,21 @@ La degradación de nivel (ej: production → beta) también está permitida si s
 5. Al menos 2 casos reales probados antes del merge.
 6. Entry en `CHANGELOG.md`.
 7. Comunicación al equipo en el canal interno.
+
+### Skills de arquitectura y tech-lead (política específica)
+
+Los skills en las categorías `architecture`, `processes` y los agentes `grv-architect`/`grv-tech-lead`
+involucran decisiones de alto impacto (ADRs, release go/no-go, incident command). Se aplican
+las mismas reglas que para cambios grandes, más:
+
+- El referente del área (`[ARCHITECT_REFERENT]` o `[TECH_LEAD_REFERENT]`) debe ser reviewer.
+- Los ejemplos documentados en el SKILL.md deben provenir de casos reales del proyecto GRV,
+  no ejemplos genéricos.
+- Las decisiones capturadas via `workspace-contribution` como `architectural-decision` requieren
+  review expreso del `[ARCHITECT_REFERENT]` antes del merge, aunque lleguen por rama `contrib/`.
+- La promoción de alpha → beta de estos skills requiere además que un LT del equipo confirme
+  que el skill respondió correctamente en al menos 1 situación real de presión (release, incidente,
+  decisión de diseño con trade-offs reales).
 
 ## Versionado
 

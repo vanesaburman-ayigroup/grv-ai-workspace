@@ -18,6 +18,7 @@ combina las reglas generales con la memoria institucional del equipo.
 - `skills/engineering/react-mfe-review`
 - `skills/engineering/mariadb-migration-review` (si el diff incluye SQL)
 - `skills/engineering/grv-best-practices`
+- `skills/engineering/api-design-review` (si el diff incluye endpoints nuevos o cambios de contrato)
 - `skills/domain/grv-bugs-conocidos`
 - `skills/domain/grv-arquitectura-plataforma`
 

@@ -66,6 +66,18 @@ escribir un solo test.
 - Arreglar un test que falla sin investigar por qué → no.
 - Escribir tests sobre código que cambia cada semana sin spec estable → primero estabilizar el spec.
 
+## Relación con unit-test-author
+
+Este skill valida **comportamiento observable contra una fuente de verdad (spec, ticket, documento)**. Es complementario a `unit-test-author`, que cubre **aislamiento de unidad** (cómo se comporta una función/clase cuando sus colaboradores se mockean).
+
+Regla de oro para elegir cuál usar:
+
+| Pregunta | Skill |
+|---|---|
+| "¿Cumple el código con el spec?" | `functional-test-author` |
+| "¿Funciona la función sola, aislada?" | `unit-test-author` |
+| "¿Qué nivel de test conviene para X?" | `test-coverage-strategy` |
+
 ## Flujo forzado (el corazón del skill)
 
 ### Paso 1 — Pedir la fuente de verdad

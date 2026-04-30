@@ -91,11 +91,24 @@ Glosario completo: `context/glossary.yaml`.
 | Revisar migración SQL | `mariadb-migration-review` + `grv-migration-guard` |
 | Code review backend | `spring-boot-review` + `grv-reviewer` |
 | Code review frontend | `react-mfe-review` + `grv-reviewer` |
-| Escribir tests | `functional-test-author` + `grv-test-author`. **Pedir fuente de verdad antes de escribir un solo test.** |
+| Escribir tests funcionales (contra spec) | `functional-test-author` + `grv-test-author`. **Pedir fuente de verdad antes de escribir un solo test.** |
+| Escribir tests unitarios puros | `unit-test-author` + `grv-test-author` |
+| Decidir qué nivel de test usar | `test-coverage-strategy` |
 | Consulta regulatoria | `grv-regulaciones-srt` |
 | ¿Qué servicio toca X? | `context/microservices.yaml` + `grv-arquitectura-plataforma` |
 | Bug familiar | `grv-bugs-conocidos` |
 | Onboarding | skill `onboarding` |
+| Diseñar endpoint nuevo | `api-design-review` + `endpoint-design.md` (prompt) |
+| Documentar API sin Swagger | `openapi-from-scratch` → `openapi-validator` |
+| Sincronizar Swagger con código | `api-doc-sync` + `grv-doc-keeper` |
+| Decisión arquitectónica | `adr-helper` + `architecture-patterns` + `grv-architect` |
+| Cambio en tabla heavy | `database-design-heavy-table` + `grv-migration-guard` |
+| Instrumentar un servicio | `observability-blueprint` |
+| ¿Listo para deployar? | `release-readiness` + `grv-tech-lead` |
+| Impacto de un cambio cross-team | `cross-team-impact` |
+| Incident activo en prod | `incident-command` + `grv-tech-lead` |
+| Deuda técnica del equipo | `tech-debt-audit` + `tech-debt-prioritization.md` (prompt) |
+| Preparar el sprint | `sprint-planning-impact` + `grv-tech-lead` |
 
 ## Lo que NO hacemos
 
@@ -107,7 +120,7 @@ Glosario completo: `context/glossary.yaml`.
 
 ## Estado del workspace
 
-- **Versión**: 0.1.0 (bootstrap)
+- **Versión**: 0.2.0 (Fase 1: arquitectos, tech leads, testing unitario, OpenAPI)
 - **Owner**: `[OWNER_NAME]`
 - **Co-maintainer**: `[COMAINTAINER_NAME]`
 

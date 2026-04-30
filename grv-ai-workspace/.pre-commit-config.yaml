@@ -1,0 +1,63 @@
+# .pre-commit-config.yaml
+# Configuración del framework pre-commit (https://pre-commit.com)
+# para los hooks del workspace GRV AI.
+#
+# Instalación del framework:
+#   pip install pre-commit
+#   pre-commit install           # instala pre-commit hook
+#   pre-commit install --hook-type commit-msg  # instala commit-msg hook
+#
+# Alternativa sin el framework: usar scripts/install-hooks.sh
+
+repos:
+  # Hooks propios del workspace GRV
+  - repo: local
+    hooks:
+
+      # --- PRE-COMMIT: Detectar secretos ---
+      - id: grv-secrets-check
+        name: "[GRV] Detectar secretos en archivos staged"
+        entry: bash .claude/hooks/pre-commit-secrets.sh
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+
+      # --- PRE-COMMIT: Validar migraciones SQL ---
+      - id: grv-migration-check
+        name: "[GRV] Validar formato de migraciones SQL"
+        entry: bash .claude/hooks/pre-commit-migration.sh
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+
+      # --- PRE-COMMIT: Sincronización API ---
+      - id: grv-api-sync
+        name: "[GRV] Advertir drift en API doc si se tocaron controllers"
+        entry: bash .claude/hooks/pre-commit-api-sync.sh
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+
+      # --- PRE-COMMIT: Sincronización OpenAPI ---
+      - id: grv-openapi-sync
+        name: "[GRV] Advertir si controllers cambiaron pero no openapi.yaml"
+        entry: bash .claude/hooks/pre-commit-openapi-sync.sh
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+
+      # --- PRE-COMMIT: TODOs huérfanos ---
+      - id: grv-todo-orphan
+        name: "[GRV] Detectar TODOs/FIXMEs sin ticket ni fecha"
+        entry: bash .claude/hooks/pre-commit-todo-orphan.sh
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+
+      # --- COMMIT-MSG: Conventional Commits ---
+      - id: grv-conventional-commits
+        name: "[GRV] Validar formato de Conventional Commits"
+        entry: bash .claude/hooks/pre-commit-conventional-commits.sh
+        language: system
+        stages: [commit-msg]
+        pass_filenames: true  # recibe el path al archivo de mensaje
