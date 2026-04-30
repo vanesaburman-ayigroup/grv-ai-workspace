@@ -5,6 +5,7 @@
 # Propósito: ejecutar formateadores disponibles después de ediciones de Claude.
 # Dispara en: PostTool / después de Edit, MultiEdit o Write.
 # Modo: warn; nunca bloquea si no hay formateador instalado.
+# Formato: google-java-format para Java; Prettier para React/TS/JS/CSS/MD/YAML/JSON.
 # -----------------------------------------------------------------------------
 
 set -euo pipefail
@@ -100,15 +101,28 @@ elif command -v npx >/dev/null 2>&1 && npx --no-install prettier --version >/dev
   PRETTIER=(npx --no-install prettier --write)
 fi
 
+JAVA_FORMATTER=()
+if command -v google-java-format >/dev/null 2>&1; then
+  JAVA_FORMATTER=(google-java-format --replace)
+elif [[ -n "${GOOGLE_JAVA_FORMAT_JAR:-}" ]] && [[ -f "${GOOGLE_JAVA_FORMAT_JAR:-}" ]] && command -v java >/dev/null 2>&1; then
+  JAVA_FORMATTER=(java -jar "$GOOGLE_JAVA_FORMAT_JAR" --replace)
+fi
+
 format_file() {
   local file="$1"
 
   [[ -f "$file" ]] || return 0
 
   case "$file" in
-    *.js|*.jsx|*.ts|*.tsx|*.json|*.css|*.scss|*.md|*.yaml|*.yml)
+     *.js|*.jsx|*.ts|*.tsx|*.json|*.css|*.scss|*.md|*.yaml|*.yml)
       if [[ ${#PRETTIER[@]} -gt 0 ]]; then
         "${PRETTIER[@]}" "$file" >>"$LOG_FILE" 2>&1 || true
+        echo "🎨 grv-ai-workspace: formateado $file"
+      fi
+      ;;
+    *.java)
+      if [[ ${#JAVA_FORMATTER[@]} -gt 0 ]]; then
+        "${JAVA_FORMATTER[@]}" "$file" >>"$LOG_FILE" 2>&1 || true
         echo "🎨 grv-ai-workspace: formateado $file"
       fi
       ;;

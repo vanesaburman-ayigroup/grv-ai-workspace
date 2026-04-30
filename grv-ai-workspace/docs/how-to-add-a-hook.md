@@ -91,13 +91,18 @@ dev debe hacerlo una vez. Opciones:
 Los hooks `pre-tool-*`, `post-tool-*` y `post-edit-*` los ejecuta Claude Code
 cuando están listados en `.claude/settings.json`.
 
+La guía de uso e instalación para desarrolladores está en
+`.claude/hooks/README.md`.
+
 ## Hooks disponibles
 
 | Hook | Tipo | Modo | Propósito |
 |---|---|---|---|
 | `pre-tool-branch-guard` | PreTool | warn por default | Advierte si Claude intenta modificar estando en `main`, `master`, `develop` o `release/*`. Puede bloquear con `GRV_BRANCH_GUARD_MODE=block`. |
-| `post-tool-auto-format` | PostTool | warn | Ejecuta formateadores ya instalados (`prettier`, `ruff`, `black`, `shfmt`) sobre archivos editados. No instala dependencias. |
+| `pre-commit-typescript-quality` | pre-commit | warn por default | Si hay TypeScript staged, corre los scripts existentes `lint` y `typecheck` del `package.json` cercano. Puede bloquear con `GRV_TS_CHECK_MODE=block`. |
+| `post-tool-auto-format` | PostTool | warn | Ejecuta formateadores ya instalados (`google-java-format` para Java, `prettier` para React/TS/JS/CSS/MD/YAML/JSON, `ruff`, `black`, `shfmt`) sobre archivos editados. No instala dependencias. |
 | `post-tool-cost-tracker` | PostTool | observability | Registra eventos y tokens/costos si Claude Code los expone en `.claude/logs/cost-tracker.jsonl`. Resumen: `.claude/hooks/post-tool-cost-tracker.sh summary`. |
+| `post-tool-feature-workflow` | PostTool / comando | warn | Al cerrar una feature, recuerda lint/typecheck, `mariadb-migration-review` si hubo SQL, `changelog-keeper` y `/plan` si quedan pasos. |
 | `post-tool-sound-alert` | PostTool / comando | opt-in | Reproduce sonidos cortos para atención, finalización, plan, skill y subagente. |
 
 Para estimaciones de costo, `post-tool-cost-tracker` acepta las variables
@@ -111,6 +116,14 @@ evitar recursión excesiva en payloads anidados.
 ## Sound alerts
 
 El hook de sonido está desactivado por default para no sorprender al equipo.
+Cada alerta es un sonido corto generado localmente:
+
+- `attention`: error, permiso o acción que requiere mirar la terminal.
+- `complete`: una herramienta terminó correctamente.
+- `plan`: cierre o detección de actividad de planificación.
+- `skill`: ejecución relacionada con skills.
+- `subagent`: ejecución relacionada con subagentes.
+
 Comandos:
 
 ```bash

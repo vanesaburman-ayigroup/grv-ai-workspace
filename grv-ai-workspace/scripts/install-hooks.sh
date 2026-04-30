@@ -66,6 +66,8 @@ install_wrapper "pre-commit" "pre-commit-*.sh"
 
 echo ""
 echo "Hooks instalados."
+echo "Documentación:"
+echo "  .claude/hooks/README.md"
 echo "Sound alerts:"
 echo "  Activar:    .claude/hooks/post-tool-sound-alert.sh on"
 echo "  Desactivar: .claude/hooks/post-tool-sound-alert.sh off"
