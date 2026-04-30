@@ -7,6 +7,20 @@ Versionado según SemVer liviano (ver `GOVERNANCE.md`).
 
 ## [Unreleased]
 
+### Hooks
+- **`pre-tool-branch-guard`** nuevo: guardrail PreTool para advertir o
+  bloquear cambios de Claude Code en ramas protegidas.
+- **`post-tool-auto-format`** nuevo: PostTool que ejecuta formateadores ya
+  instalados sobre archivos editados por Claude.
+- **`post-tool-cost-tracker`** nuevo: PostTool de observabilidad que registra
+  uso/tokens/costos reportados por Claude Code y permite ver un resumen local.
+- **`post-tool-sound-alert`** nuevo: alertas sonoras opt-in para atención,
+  fin de tarea, fin de plan, skills y subagentes, con comandos on/off/status.
+- **`scripts/install-hooks.sh`** nuevo: instalador shell para wrappers de hooks
+  Git locales.
+- **`docs/how-to-add-a-hook.md`** actualizado con guía de instalación,
+  hooks PreTool/PostTool y comandos de sound alerts.
+
 ### Optimización de tokens
 - **`CLAUDE.md` adelgazado** de ~1.370 palabras a ~570 (58% menos).
   Se mantuvo lo esencial operativo y se movió el contexto extendido a

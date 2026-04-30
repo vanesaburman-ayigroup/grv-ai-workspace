@@ -10,6 +10,8 @@ del ciclo de desarrollo: pre-commit, pre-push, post-edit, pre-MR, etc.
 | `pre-commit-*` | Antes de cada commit local | Validaciones rápidas, linting, secrets scan |
 | `pre-push-*` | Antes de push | Tests, validaciones que toman más tiempo |
 | `post-edit-*` | Después que Claude edita un archivo | Checks de calidad del output de Claude |
+| `pre-tool-*` | Antes de una herramienta de Claude Code | Guardrails antes de editar o ejecutar comandos |
+| `post-tool-*` | Después de una herramienta de Claude Code | Formato, observabilidad, alertas |
 | `pre-mr-*` | Al crear MR (via CI) | Review automático completo |
 | `post-deploy-*` | Después de deploy (via CI) | Post-mortem, smoke tests |
 
@@ -82,9 +84,37 @@ Todo hook arranca en warn mode. Pasa a blocking cuando:
 Los hooks de `.claude/hooks/` no se instalan solos en `.git/hooks/`. Cada
 dev debe hacerlo una vez. Opciones:
 
-1. **Manual**: crear symlinks de `.claude/hooks/pre-commit-*.sh` a `.git/hooks/pre-commit`.
-2. **Con `pre-commit` framework** (recomendado): tener un `.pre-commit-config.yaml` que apunte a los hooks del workspace. Esto permite composición con otros hooks estándar (black, eslint, etc).
-3. **Script de setup**: `scripts/install-hooks.sh` (TODO del workspace).
+1. **Script de setup**: ejecutar `scripts/install-hooks.sh` desde la raíz del repo. Instala un wrapper en `.git/hooks/pre-commit` que corre todos los `.claude/hooks/pre-commit-*.sh`.
+2. **Manual**: crear symlinks de `.claude/hooks/pre-commit-*.sh` a `.git/hooks/pre-commit`.
+3. **Con `pre-commit` framework**: tener un `.pre-commit-config.yaml` que apunte a los hooks del workspace. Esto permite composición con otros hooks estándar (black, eslint, etc).
+
+Los hooks `pre-tool-*`, `post-tool-*` y `post-edit-*` los ejecuta Claude Code
+cuando están listados en `.claude/settings.json`.
+
+## Hooks disponibles
+
+| Hook | Tipo | Modo | Propósito |
+|---|---|---|---|
+| `pre-tool-branch-guard` | PreTool | warn por default | Advierte si Claude intenta modificar estando en `main`, `master`, `develop` o `release/*`. Puede bloquear con `GRV_BRANCH_GUARD_MODE=block`. |
+| `post-tool-auto-format` | PostTool | warn | Ejecuta formateadores ya instalados (`prettier`, `ruff`, `black`, `shfmt`) sobre archivos editados. No instala dependencias. |
+| `post-tool-cost-tracker` | PostTool | observability | Registra eventos y tokens/costos si Claude Code los expone en `.claude/logs/cost-tracker.jsonl`. Resumen: `.claude/hooks/post-tool-cost-tracker.sh summary`. |
+| `post-tool-sound-alert` | PostTool / comando | opt-in | Reproduce sonidos cortos para atención, finalización, plan, skill y subagente. |
+
+## Sound alerts
+
+El hook de sonido está desactivado por default para no sorprender al equipo.
+Comandos:
+
+```bash
+.claude/hooks/post-tool-sound-alert.sh on
+.claude/hooks/post-tool-sound-alert.sh off
+.claude/hooks/post-tool-sound-alert.sh status
+.claude/hooks/post-tool-sound-alert.sh test complete
+.claude/hooks/post-tool-sound-alert.sh test attention
+```
+
+Si el sistema no tiene reproductor de audio (`afplay`, `paplay`, `pw-play`,
+`aplay`, `ffplay` o `play`), usa el bell de terminal como fallback.
 
 ## Hooks en CI vs hooks locales
 
