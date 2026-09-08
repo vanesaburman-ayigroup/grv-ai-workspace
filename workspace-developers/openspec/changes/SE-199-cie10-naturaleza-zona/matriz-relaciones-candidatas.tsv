@@ -1,0 +1,134 @@
+veredicto	cie10	diagnostico	casos_limpios	variantes	nat_codigo_srt	naturaleza	nat_pct	zona_codigo_srt	zona	zona_pct	motivo	VALIDACION_REGISTROS
+AUTOCOMPLETA_TERNA	S80.0	CONTUSIÓN DE LA RODILLA.	733	5	07	Contusiones	98	042	Rodilla	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S60.0	CONTUSIÓN DE DEDO (S) DE LA MANO, SIN DAÑO DE LA (S) UÑA (S)	168	1	07	Contusiones	100	036	Dedos de las manos	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S61.0	HERIDA DE DEDO(S) DE LA MANO, SIN DAÑO DE LA(S) UÑA(S)	92	4	03	Heridas cortantes	86	036	Dedos de las manos	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S90.0	CONTUSIÓN DEL TOBILLO.	84	4	07	Contusiones	96	044	Tobillo	99	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S13.4	ESGUINCES Y DESGARROS DE LA COLUMNA CERVICAL.	84	3	23	Esguinces	85	020	Región cervical (columna v	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S50.0	CONTUSIÓN DEL CODO.	80	2	07	Contusiones	100	032	Codo	95	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S80.1	CONTUSIÓN DE OTRAS PARTES Y LAS NO ESPECIFICADAS DE LA PIERN	64	3	07	Contusiones	95	043	Pierna	95	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S20.2	CONTUSIÓN DEL TORAX	59	3	07	Contusiones	100	023	Tórax (costillas, esternón	93	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S70.0	CONTUSIÓN DE LA CADERA.	54	1	07	Contusiones	100	040	Cadera	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S60.1	CONTUSIÓN DE DEDO (S) DE LA MANO CON DAÑO DE LA (S) UÑA (S).	36	2	07	Contusiones	100	036	Dedos de las manos	92	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S92.5	FRACTURA DE LOS HUESOS DE OTRO (S) DEDO (S) DEL PIE.	23	4	11	Fracturas cerradas	87	046	Dedos de los pies	91	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S83.7	TRAUMATISMO DE ESTRUCTURAS MÚLTIPLES DE LA RODILLA.	16	1	08	Traumatismos internos	100	042	Rodilla	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	J38.3	OTRAS ENFERMEDADES DE LAS CUERDAS VOCALES Y LA LARINGE	15	1	21	Disfunciones orgánicas	100	071	Laringe	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S20.0	CONTUSIÓN DE LA MAMA.	12	1	07	Contusiones	100	133	Mamas	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S70.1	CONTUSIÓN DEL MUSLO.	12	1	07	Contusiones	100	041	Muslo	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_TERNA	S33.5	ESGUINCES Y DESGARROS DE LA COLUMNA LUMBAR.	11	2	23	Esguinces	91	022	Región lumbosacra (columna	100	zona y naturaleza deterministicas	
+AUTOCOMPLETA_ZONA	S93.4	ESGUINCES Y TORCEDURAS DEL TOBILLO	310	5	23	Esguinces	81	044	Tobillo	100	zona firme (100%), naturaleza dispersa (81%)	
+AUTOCOMPLETA_ZONA	S89.7	TRAUMATISMOS MÚLTIPLES DE LA PIERNA.	131	5	07	Contusiones	81	043	Pierna	99	zona firme (99%), naturaleza dispersa (81%)	
+AUTOCOMPLETA_ZONA	S00.3	TRAUMATISMO SUPERFICIAL DE LA NARIZ.	39	3	07	Contusiones	54	007	Nariz	100	zona firme (100%), naturaleza dispersa (54%)	
+AUTOCOMPLETA_ZONA	S81.8	HERIDA DE OTRAS PARTES DE LA PIERNA.	33	6	03	Heridas cortantes	55	043	Pierna	97	zona firme (97%), naturaleza dispersa (55%)	
+AUTOCOMPLETA_ZONA	S63.5	ESGUINCE Y DESGARO DE LA MUÑECA.	31	3	23	Esguinces	71	034	Muñeca	100	zona firme (100%), naturaleza dispersa (71%)	
+AUTOCOMPLETA_ZONA	H57.9	TRAUMATISMO DE OJO	26	3	07	Contusiones	58	002	Ojos (con inclusión de los	100	zona firme (100%), naturaleza dispersa (58%)	
+AUTOCOMPLETA_ZONA	M23	TRASTORNOS INTERNOS DE LA RODILLA	25	6	08	Traumatismos internos	52	042	Rodilla	92	zona firme (92%), naturaleza dispersa (52%)	
+AUTOCOMPLETA_ZONA	S80.8	OTROS TRAUMATISMOS SUPERFICIALES DE LA PIERNA.	24	2	08	Traumatismos internos	63	043	Pierna	100	zona firme (100%), naturaleza dispersa (63%)	
+AUTOCOMPLETA_ZONA	S01.5	HERIDA DEL LABIO Y DE LA CAVIDAD BUCAL.	24	3	03	Heridas cortantes	83	006	Boca (con inclusión de lab	100	zona firme (100%), naturaleza dispersa (83%)	
+AUTOCOMPLETA_ZONA	S10.8	TRAUMATISMO SUPERFICIAL DE OTRAS PARTES DEL CUELLO.	21	2	07	Contusiones	67	016	Cuello	100	zona firme (100%), naturaleza dispersa (67%)	
+AUTOCOMPLETA_ZONA	S41.1	HERIDA DEL BRAZO.	16	4	03	Heridas cortantes	81	031	Brazo (Incluyendo articula	94	zona firme (94%), naturaleza dispersa (81%)	
+AUTOCOMPLETA_ZONA	S61.1	HERIDA DE DEDO (S) DE LA MANO, CON DAÑO DE LA (S) UÑA (S).	14	4	03	Heridas cortantes	79	036	Dedos de las manos	100	zona firme (100%), naturaleza dispersa (79%)	
+AUTOCOMPLETA_ZONA	S00.5	TRAUMATISMO SUPERFICIAL DEL LABIO Y DEL CAVIDAD BUCAL.	14	2	07	Contusiones	71	006	Boca (con inclusión de lab	100	zona firme (100%), naturaleza dispersa (71%)	
+AUTOCOMPLETA_ZONA	T15.0	CUERPO EXTRAÑO EN LA CORNEA	10	3	15	Cuerpo extraño en ojos	80	002	Ojos (con inclusión de los	100	zona firme (100%), naturaleza dispersa (80%)	
+AUTOCOMPLETA_ZONA	H83.3	EFECTOS DEL RUIDO SOBRE EL OIDO INTERNO	10	3	27	Perdida auditiva	80	004	Oído (incluye Oído medio e	100	zona firme (100%), naturaleza dispersa (80%)	
+SUGIERE	S00.8	TRAUMATISMO SUPERFICIAL DE OTRAS PARTES DE LA CABEZA	278	12	07	Contusiones	79	015	Cabeza, ubicaciones múltip	87	concentracion media, editable	
+SUGIERE	S00.1	CONTUSIÓN DE LOS PÁRPADOS Y DE LA REGIÓN PERIOCULAR.	48	4	07	Contusiones	98	009	Cara (ubicación no clasifi	81	concentracion media, editable	
+SUGIERE	S30.0	CONTUSIÓN DE LA REGIÓN LUMBOSACRA Y DE LA PELVIS.	45	2	07	Contusiones	100	022	Región lumbosacra (columna	89	concentracion media, editable	
+SUGIERE	S06.9	TRAUMATISMO INTRACRANEAL, NO ESPECIFICADO.	38	7	07	Contusiones	74	015	Cabeza, ubicaciones múltip	84	concentracion media, editable	
+SUGIERE	S90.1	CONTUSIÓN DE DEDO (S) DEL PIE SIN DAÑO DE LA UÑA (S)	33	5	07	Contusiones	94	046	Dedos de los pies	76	concentracion media, editable	
+SUGIERE	S93.2	RUPTURA DE LIGAMENTOS A NIVEL DEL TOBILLO Y DEL PIE.	22	5	23	Esguinces	73	044	Tobillo	77	concentracion media, editable	
+SUGIERE	S01	Herida de la cabeza	19	4	03	Heridas cortantes	89	015	Cabeza, ubicaciones múltip	89	concentracion media, editable	
+SUGIERE	M23.8	OTROS TRASTORNOS INTERNOS DE LA RODILLA	19	5	07	Contusiones	95	042	Rodilla	79	concentracion media, editable	
+SUGIERE	A16.9	TUBERCULOSIS PULMONAR	13	4	21	Disfunciones orgánicas	92	074	Pulmones	77	concentracion media, editable	
+SUGIERE	S81.0	HERIDA DE LA RODILLA.	11	4	03	Heridas cortantes	73	042	Rodilla	82	concentracion media, editable	
+SUGIERE	S63.4	RUPTURA TRAUMÁTICA DE LIGAMENTOS DEL DEDO DE LA MANO EN LA (	10	4	07	Contusiones	80	036	Dedos de las manos	80	concentracion media, editable	
+SUGIERE	S92.4	FRACTURA DE LOS HUESOS DEL DEDO GORDO DEL PIE.	10	4	11	Fracturas cerradas	70	046	Dedos de los pies	70	concentracion media, editable	
+SUGIERE	M51.1	TRASTORNOS DE DISCO LUMBAR Y OTROS, CON RADICULOPATÍA	8	2	21	Disfunciones orgánicas	88	022	Región lumbosacra (columna	100	concentracion media, editable	
+SUGIERE	S05.8	Otros traumatismos del ojo y de la órbita Traumatismo del co	8	5	07	Contusiones	75	002	Ojos (con inclusión de los	75	concentracion media, editable	
+SUGIERE	S01.2	HERIDA DE LA NARIZ.	8	2	03	Heridas cortantes	88	007	Nariz	100	concentracion media, editable	
+SUGIERE	S56.1	TRAUMATISMO DEL TENDÓN Y MÚSCULO FLEXOR DE OTRO (S) DEDO (S)	8	1	08	Traumatismos internos	100	036	Dedos de las manos	100	concentracion media, editable	
+SUGIERE	I83	VARICES DE LAS EXTREMIDADES INFERIORES	8	1	21	Disfunciones orgánicas	100	201	Miembros Inferiores	100	concentracion media, editable	
+SUGIERE	S90.3	CONTUSIÓN DE OTRAS PARTES Y DE LAS NO ESPECIFICA DAS DEL PIE	7	1	07	Contusiones	100	045	Pie (con excepción de los	100	concentracion media, editable	
+SUGIERE	M75.4	SINDROME DE ABDUCCION DOLOROSA DEL HOMBRO	7	1	21	Disfunciones orgánicas	100	030	Hombro (con inclusión de c	100	concentracion media, editable	
+SUGIERE	M53.1	SINDROME CERVICO BRAQUIAL	6	1	21	Disfunciones orgánicas	100	020	Región cervical (columna v	100	concentracion media, editable	
+SUGIERE	M51.3	DEGENERACIONES DISCALES DE COLUMNA VERTEBRAL	6	2	21	Disfunciones orgánicas	83	022	Región lumbosacra (columna	83	concentracion media, editable	
+SUGIERE	S01.9	HERIDA DE LA CABEZA, PARTE NO ESPECIFICADA.	6	1	03	Heridas cortantes	100	015	Cabeza, ubicaciones múltip	100	concentracion media, editable	
+SUGIERE	S41.7	HERIDAS MÚLTIPLES DEL HOMBRO Y DEL BRAZO.	6	3	03	Heridas cortantes	83	031	Brazo (Incluyendo articula	83	concentracion media, editable	
+SUGIERE	S51.8	HERIDA DE OTRAS PARTES DEL ANTEBRAZO.	6	1	03	Heridas cortantes	100	033	Antebrazo	100	concentracion media, editable	
+SUGIERE	T15.9	CUERPO EXTRAÑO EN PARTE EXTERNA DEL OJO, SITIO NO ESPECIFICA	6	1	15	Cuerpo extraño en ojos	100	002	Ojos (con inclusión de los	100	concentracion media, editable	
+SUGIERE	S66.3	TRAUMATISMO DEL TENDÓN Y MÚSCULO EXTENSOR DE OTRO (S) DEDO (	5	1	07	Contusiones	100	036	Dedos de las manos	100	concentracion media, editable	
+SUGIERE	S01.4	HERIDA DE LA MEJILLA Y DE LA REGIÓN TEMPOROMANDIBULAR.	5	2	03	Heridas cortantes	80	009	Cara (ubicación no clasifi	100	concentracion media, editable	
+SUGIERE	S42.8	FRACTURA DE OTRAS PARTES DEL HOMBRO Y DEL BRAZO	5	1	11	Fracturas cerradas	100	031	Brazo (Incluyendo articula	100	concentracion media, editable	
+SUGIERE	S01.7	HERIDAS MÚLTIPLES DE LA CABEZA.	5	1	03	Heridas cortantes	100	015	Cabeza, ubicaciones múltip	100	concentracion media, editable	
+SUGIERE	L30.9	QUEMADURA EN ROSTRO	5	2	14	Quemaduras térmicas	80	009	Cara (ubicación no clasifi	100	concentracion media, editable	
+AUTOCOMPLETA_ZONA	S83.6	ESGUINCES Y DESGARROS DE OTRAS PARTES Y LAS NO ESPECIFICADAS	66	10	07	Contusiones	55	042	Rodilla	85	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+AUTOCOMPLETA_ZONA	S63.6	ESGUINCES Y DESGARROS DE DEDO (S) DE LA MANO.	54	9	07	Contusiones	54	036	Dedos de las manos	87	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+AUTOCOMPLETA_ZONA	S83.5	ESGUINCES Y DESGARROS QUE COMPROMETEN EL LIGAMENTO CRUZADO (	31	5	07	Contusiones	94	042	Rodilla	84	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+AUTOCOMPLETA_ZONA	S83.4	ESGUINCES Y DESGARROS QUE COMPROMETEN LOS LIGAMENTOS LATERAL	29	6	07	Contusiones	90	042	Rodilla	86	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+AUTOCOMPLETA_ZONA	S83.2	DESGARRO DE MENISCOS, PRESENTE.	24	4	07	Contusiones	83	042	Rodilla	100	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+AUTOCOMPLETA_ZONA	S63.1	LUXACIÓN DE DEDOS DE LA MANO.	9	5	07	Contusiones	67	036	Dedos de las manos	56	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+CONFLICTO	S42.2	FRACTURA DE LA EPÍFISIS SUPERIOR DEL HÚMERO.	9	5	07	Contusiones	89	030	Hombro (con inclusión de c	44	texto dice FRACTURA pero carga historica dice CONTUSION	
+AUTOCOMPLETA_ZONA	S62.3	FRACTURA DE OTROS HUESOS METACARPIANOS.	8	8	07	Contusiones	63	035	Mano (con excepción de los	25	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+AUTOCOMPLETA_ZONA	S42.0	FRACTURA DE LA CLAVÍCULA.	7	3	07	Contusiones	71	030	Hombro (con inclusión de c	86	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+AUTOCOMPLETA_ZONA	S53.4	ESGUINCES Y TORCEDURAS DEL CODO	7	2	07	Contusiones	100	032	Codo	71	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+CONFLICTO	M62.1	OTROS DESGARROS (NO TRAUMÁTICOS) DEL MÚSCULO	7	5	07	Contusiones	71	043	Pierna	57	texto dice ESGUINCE pero carga historica dice CONTUSION	
+AUTOCOMPLETA_ZONA	S82.1	FRACTURA DE LA EPÍFISIS SUPERIOR DE LA TIBIA.	6	5	07	Contusiones	50	042	Rodilla	67	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+AUTOCOMPLETA_ZONA	S22.4	FRACTURAS MÚLTIPLES DE COSTILLAS.	5	1	07	Contusiones	100	023	Tórax (costillas, esternón	100	BLOQUE C: zona por anatomia, no por frecuencia (D-4); naturaleza libre porque la carga historica contradice al diagnostico (D-11)	
+NO_RELACIONAR	Z20.9	CONTACTO CON Y EXPOSICIÓN A ENFERMEDADES TRANSMISIBLES NO ES	440	39	02	Heridas punzantes	64	036	Dedos de las manos	62	codigo inespecifico / multizona	
+NO_RELACIONAR	S40.0	CONTUSIÓN DEL HOMBRO Y DEL BRAZO	324	8	07	Contusiones	99	030	Hombro (con inclusión de c	52	dispersion alta (z52% n99%)	
+NO_RELACIONAR	V49.4	POLITRAUMATISMOS	259	47	07	Contusiones	84	042	Rodilla	24	codigo inespecifico / multizona	
+NO_RELACIONAR	S60.2	CONTUSIÓN DE OTRAS PARTES DE LA MUÑECA Y DE LA MANO.	201	7	07	Contusiones	100	034	Muñeca	56	dispersion alta (z56% n100%)	
+AUTOCOMPLETA_ZONA	M54.2	CERVICALGIA	199	14	07	Contusiones	49	020	Región cervical (columna v	94	zona determinada por el propio diagnostico (criterio anatomico, igual que el bloque C); naturaleza no derivable -> NULL. Alta 03/09/2026	
+NO_RELACIONAR	T14.2	FRACTURA DE REGIÓN NO ESPECIFICADA DEL CUERPO.	140	46	11	Fracturas cerradas	55	036	Dedos de las manos	16	codigo inespecifico / multizona	
+AUTOCOMPLETA_ZONA	M54.4	LUMBALGIA CON CIATICA	126	7	07	Contusiones	54	022	Región lumbosacra (columna	98	zona determinada por el propio diagnostico (criterio anatomico, igual que el bloque C); naturaleza no derivable -> NULL. Alta 03/09/2026	
+NO_RELACIONAR	S00.9	Traumatismo superficial de la cabeza, parte no especificada	76	9	07	Contusiones	55	015	Cabeza, ubicaciones múltip	88	dispersion alta (z88% n55%)	
+NO_RELACIONAR	T75	EFECTOS DE OTRAS CAUSAS EXTERNAS	68	31	21	Disfunciones orgánicas	69	050	Aparato cardiovascular en	16	codigo inespecifico / multizona	
+NO_RELACIONAR	T00	TRAUMATISMOS SUPERFICIALES QUE AFECTAN MÚLTIPLES REGIONES DE	53	25	07	Contusiones	62	042	Rodilla	26	codigo inespecifico / multizona	
+AUTOCOMPLETA_ZONA	M54.5	LUMBAGO NO ESPECIFICADO	49	5	07	Contusiones	43	022	Región lumbosacra (columna	100	zona determinada por el propio diagnostico (criterio anatomico, igual que el bloque C); naturaleza no derivable -> NULL. Alta 03/09/2026	
+NO_RELACIONAR	T06.8	OTROS TRAUMATISMOS ESPECIFICADOS QUE AFECTAN MÚLTIPLES REGIO	40	21	07	Contusiones	68	015	Cabeza, ubicaciones múltip	48	codigo inespecifico / multizona	
+NO_RELACIONAR	S62.6	FRACTURA DE OTRO DEDO DE LA MANO.	35	7	11	Fracturas cerradas	57	036	Dedos de las manos	83	dispersion alta (z83% n57%)	
+NO_RELACIONAR	S90.9	TRAUMATISMO SUPERIFICIAL DEL PIE Y DEL TOBILLO, NO ESPECIFIC	34	6	07	Contusiones	59	045	Pie (con excepción de los	65	dispersion alta (z65% n59%)	
+NO_RELACIONAR	S60	Traumatismo superficial de la muñeca y de la mano	33	6	07	Contusiones	52	035	Mano (con excepción de los	64	dispersion alta (z64% n52%)	
+NO_RELACIONAR	S90.8	OTROS TRAUMATISMOS SUPERFICIALES DEL PIE Y DEL TOBILLO.	29	5	07	Contusiones	48	045	Pie (con excepción de los	69	dispersion alta (z69% n48%)	
+NO_RELACIONAR	R49.0	DISFONIA	22	1	21	Disfunciones orgánicas	100	071	Laringe	100	codigo inespecifico / multizona	
+NO_RELACIONAR	S61	Herida de la muñeca y de la mano	21	5	03	Heridas cortantes	76	035	Mano (con excepción de los	52	dispersion alta (z52% n76%)	
+NO_RELACIONAR	M65	SINOVITIS Y TENOSINOVITIS	21	12	21	Disfunciones orgánicas	76	034	Muñeca	19	dorsopatia/no traumatico: naturaleza no derivable	
+NO_RELACIONAR	S60.9	TRAUMATISMO SUPERFICIAL DE LA MUÑECA Y DE LA MANO, NO ESPECI	21	4	07	Contusiones	71	035	Mano (con excepción de los	62	dispersion alta (z62% n71%)	
+AUTOCOMPLETA_ZONA	M54.9	DORSALGIA NO ESPECIFICADA	18	3	07	Contusiones	56	021	Región dorsal (columna ver	100	zona determinada por el propio diagnostico (criterio anatomico, igual que el bloque C); naturaleza no derivable -> NULL. Alta 03/09/2026	
+NO_RELACIONAR	M75.1	Síndrome del manguito rotatorio Desgarro o ruptura del mangu	17	4	21	Disfunciones orgánicas	59	030	Hombro (con inclusión de c	76	dispersion alta (z76% n59%)	
+NO_RELACIONAR	F99	TRASTORNO MENTAL NO ESPECIFICADO EN OTRA PARTE	17	1	28	Efectos de impacto psíquic	100	180	Aparato Psíquico	100	codigo inespecifico / multizona	
+NO_RELACIONAR	S40.8	OTROS TRAUMATISMOS SUPERFICIALES DEL HOMBRO Y DEL BRAZO.	17	4	08	Traumatismos internos	76	031	Brazo (Incluyendo articula	59	dispersion alta (z59% n76%)	
+NO_RELACIONAR	S60.8	OTROS TRAUMATISMOS SUPERFICIALES DE LA MUÑECA Y DE LA MANO.	15	4	07	Contusiones	60	035	Mano (con excepción de los	53	dispersion alta (z53% n60%)	
+NO_RELACIONAR	S82.4	FRACTURA DEL PERONÉ SOLAMENTE.	15	5	11	Fracturas cerradas	60	043	Pierna	47	dispersion alta (z47% n60%)	
+NO_RELACIONAR	S61.8	HERIDA DE OTRAS PARTES DE LA MUÑECA Y DE LA MANO.	14	6	03	Heridas cortantes	71	034	Muñeca	50	dispersion alta (z50% n71%)	
+NO_RELACIONAR	S92.3	FRACTURA DE HUESO DEL METATARSO.	13	4	11	Fracturas cerradas	92	045	Pie (con excepción de los	69	dispersion alta (z69% n92%)	
+NO_RELACIONAR	S50	TRAUMATISMO SUPERFICIAL DE ANTEBRAZO Y CODO	13	5	08	Traumatismos internos	77	033	Antebrazo	46	dispersion alta (z46% n77%)	
+NO_RELACIONAR	W54.4	MORDEDURA O ATAQUE DE PERRO, EN CALLES Y CARRETERAS	13	7	02	Heridas punzantes	54	043	Pierna	69	codigo inespecifico / multizona	
+NO_RELACIONAR	S01.8	HERIDA DE OTRAS PARTES DE LA CABEZA.	12	5	03	Heridas cortantes	67	015	Cabeza, ubicaciones múltip	83	dispersion alta (z83% n67%)	
+NO_RELACIONAR	S61.7	HERIDAS MÚLTIPLES DE LA MUÑECA Y DE LA MANO.	12	6	03	Heridas cortantes	50	036	Dedos de las manos	50	dispersion alta (z50% n50%)	
+NO_RELACIONAR	F43.1	STRESS POST-TRAUMATICO	10	5	28	Efectos de impacto psíquic	70	180	Aparato Psíquico	70	codigo inespecifico / multizona	
+NO_RELACIONAR	T14.1	HERIDA DE REGIÓN NO ESPECIFICADA DEL CUERPO.	10	4	05	Heridas de bala	90	043	Pierna	70	codigo inespecifico / multizona	
+NO_RELACIONAR	S40.9	TRAUMATISMO SUPERFICIAL NO ESPECIFICADO DEL HOMBRO Y DEL BRA	9	3	08	Traumatismos internos	56	031	Brazo (Incluyendo articula	78	dispersion alta (z78% n56%)	
+NO_RELACIONAR	R99	OTRAS CAUSAS MAL DEFINIDAS Y LAS NO ESPECIFICADAS DE MORTALI	9	5	07	Contusiones	44	015	Cabeza, ubicaciones múltip	67	codigo inespecifico / multizona	
+NO_RELACIONAR	S49.8	OTROS TRAUMATISMOS ESPECIFICADOS DEL HOMBRO Y DEL BRAZO.	9	5	07	Contusiones	56	031	Brazo (Incluyendo articula	67	dispersion alta (z67% n56%)	
+NO_RELACIONAR	T23.0	QUEMADURA DE LA MUÑECA Y DE LA MANO, GRADO NO ESPECIFICADO.	9	4	14	Quemaduras térmicas	78	036	Dedos de las manos	44	dispersion alta (z44% n78%)	
+NO_RELACIONAR	S81.9	HERIDA DE LA PIERNA, PARTE NO ESPECIFICADA.	9	3	03	Heridas cortantes	67	043	Pierna	100	dispersion alta (z100% n67%)	
+NO_RELACIONAR	S00.2	OTROS TRAUMATISMOS SUPERFICIALES DEL PÁRPADO Y DE LA REGIÓN	8	3	07	Contusiones	63	009	Cara (ubicación no clasifi	100	dispersion alta (z100% n63%)	
+NO_RELACIONAR	L23	DERMATITIS ALERGICA DE CONTACTO	8	6	36	Efectos por picadura	63	036	Dedos de las manos	38	dispersion alta (z38% n63%)	
+NO_RELACIONAR	S62.5	FRACTURA DEL PULGAR.	7	4	11	Fracturas cerradas	43	036	Dedos de las manos	71	dispersion alta (z71% n43%)	
+NO_RELACIONAR	T08	FRACTURA DE LA COLUMNA VERTEBRAL, NIVEL NO ESPECIFICADO.	7	3	11	Fracturas cerradas	86	022	Región lumbosacra (columna	86	codigo inespecifico / multizona	
+NO_RELACIONAR	S62.8	FRACTURA DE OTRAS PARTES Y DE LAS NO ESPECIFICADAS DE LA MUÑ	7	4	11	Fracturas cerradas	57	034	Muñeca	71	dispersion alta (z71% n57%)	
+NO_RELACIONAR	S30.8	OTROS TRAUMATISMOS SUPERFICIALES DEL ABDOMEN DE LA REGIÓN LU	7	4	07	Contusiones	57	024	Abdomen (pared abdominal)	86	dispersion alta (z86% n57%)	
+NO_RELACIONAR	S86.0	TRAUMATISMO DEL TENDÓN DE AQUILES.	6	5	07	Contusiones	33	044	Tobillo	33	dispersion alta (z33% n33%)	
+NO_RELACIONAR	T59	EFECTO TÓXICO DE OTROS GASES, HUMOS Y VAPORES	6	3	17	Intoxicaciones	83	074	Pulmones	50	dispersion alta (z50% n83%)	
+NO_RELACIONAR	G56.0	SINDROME DEL TUNEL CARPIANO	6	1	21	Disfunciones orgánicas	100	034	Muñeca	100	dorsopatia/no traumatico: naturaleza no derivable	
+NO_RELACIONAR	M50.8	OTROS TRASTORNOS DE DISCO CERVICAL	6	4	38	Distensión muscular	33	020	Región cervical (columna v	67	dispersion alta (z67% n33%)	
+NO_RELACIONAR	S51.9	HERIDA DEL ANTEBRAZO, PARTE NO ESPECIFICADA.	6	2	03	Heridas cortantes	50	033	Antebrazo	100	dispersion alta (z100% n50%)	
+NO_RELACIONAR	S30.1	CONTUSION DE LA PARED ABDOMINAL FLANCO INGLE	6	2	07	Contusiones	100	024	Abdomen (pared abdominal)	67	dispersion alta (z67% n100%)	
+NO_RELACIONAR	F43.0	Reacción al estrés agudo	6	3	28	Efectos de impacto psíquic	83	180	Aparato Psíquico	83	codigo inespecifico / multizona	
+NO_RELACIONAR	S09.8	OTRA TRAUMATISMO ESPECIFICADA DE LA CABEZA TEC CON SINT-SIGN	5	3	07	Contusiones	80	001	Región craneana (cráneo, c	40	dispersion alta (z40% n80%)	
+NO_RELACIONAR	S52.5	FRACTURA DE LA EPÍFISIS INFERIOR DEL RADIO.	5	4	11	Fracturas cerradas	60	034	Muñeca	60	dispersion alta (z60% n60%)	
+NO_RELACIONAR	Z20.8	CONTACTO CON Y EXPOSICIÓN A OTRAS ENFERMEDADES TRANSMISIBLES	5	5	03	Heridas cortantes	40	036	Dedos de las manos	20	codigo inespecifico / multizona	
+NO_RELACIONAR	K40	HERNIA INGUINAL	5	5	21	Disfunciones orgánicas	60	024	Abdomen (pared abdominal)	40	dispersion alta (z40% n60%)	
+NO_RELACIONAR	S90.2	CONTUSIÓN DE DEDO (S) DEL PIE CON DAÑO DE LA (S) UÑA (S).	5	3	07	Contusiones	80	046	Dedos de los pies	60	dispersion alta (z60% n80%)	
+NO_RELACIONAR	S00.4	TRAUMATISMO SUPERFICIAL DEL OÍDO.	5	2	07	Contusiones	60	004	Oído (incluye Oído medio e	100	dispersion alta (z100% n60%)	
+NO_RELACIONAR	S63.7	ESGUINCES Y DESGARROS DE OTRAS PARTES Y DE LAS NO ESPECIFICA	5	5	23	Esguinces	40	035	Mano (con excepción de los	40	dispersion alta (z40% n40%)	

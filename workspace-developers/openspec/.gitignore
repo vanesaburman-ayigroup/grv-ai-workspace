@@ -1,0 +1,24 @@
+# Que se versiona de openspec/ y que no
+#
+# SE VERSIONA el trabajo de especificacion: los .md (proposals, designs, specs, tasks), los .sql
+# (migraciones y scripts de permisos, con su bloque de ESTADO POR AMBIENTE) y los .yaml. Son ~2,4 MB
+# y son la unica copia que existe de las decisiones de negocio de cada change.
+#
+# NO se versionan los binarios y los derivados, que son 28 de los 31 MB y se pueden regenerar:
+#
+#   *.png     20 MB de capturas de evidencia de QA. Utiles para leer un informe, inutiles en el
+#             historial de git: nadie hace diff de una captura y pesan mas que todo el resto junto.
+#   *.docx    un manual de usuario de 6,5 MB, generado desde el .md que SI se versiona.
+#   *.html    los informes de SENTINEL QA renderizados desde su propio .md.
+#   *.rar     archivos comprimidos de carpetas que ya estan en el arbol: duplicacion pura.
+#   *.log     salida de corridas.
+#   *.previo  copias de respaldo hechas a mano antes de editar.
+#
+# Si alguno de estos hace falta compartir, va a Drive, no al repo.
+
+*.png
+*.docx
+*.html
+*.rar
+*.log
+*.previo

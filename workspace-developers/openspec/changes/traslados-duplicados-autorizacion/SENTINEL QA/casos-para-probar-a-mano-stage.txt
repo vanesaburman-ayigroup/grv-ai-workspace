@@ -1,0 +1,728 @@
+================================================================================
+INI-02 - TRASLADOS DUPLICADOS - CASOS PARA PROBAR A MANO EN STAGE
+================================================================================
+Autor: Vanesa Burman - QA
+Fecha: 24/08/2026
+Ambiente: stage.sas.colonia-suiza.com.ar  (base db.stage.sas.colonia-suiza.com.ar, esquema cs)
+
+COMO LEER ESTE ARCHIVO
+----------------------
+Cada caso tiene: QUE HACER / QUE TIENE QUE PASAR.
+Y una marca al principio del titulo:
+
+  [OK]      Se arreglo. Tiene que funcionar. Si falla, es un defecto nuevo.
+  [ABIERTO] NO se arreglo. Ya sabemos que falla. Probalo igual para confirmar
+            el sintoma y dimensionarlo, pero no lo cargues como bug nuevo.
+  [BASE]    Regresion. No lo toco esta promocion, pero si se rompe es grave.
+
+Los [ABIERTO] estan a proposito en la lista: son los que hay que decidir si
+frenan la salida a produccion o no.
+
+
+================================================================================
+ANTES DE EMPEZAR - LO QUE HAY QUE TENER A MANO
+================================================================================
+
+1. USUARIOS. Hacen falta CUATRO perfiles distintos:
+   - un gestor SIN permiso de autorizar (es el que pide la excepcion)
+   - un referente_siniestros (autoriza)
+   - un jefe_de_siniestros (autoriza)
+   - un usuario de logistica (ve la grilla y despacha)
+
+   En stage el permiso 'autorizar_traslado_mismo_dia' esta asignado a CUATRO
+   perfiles: gerente_de_siniestros, jefe_de_siniestros, referente_siniestros y
+   supervisor.
+
+   OJO CON ESTO: en PRODUCCION van a ser SOLO DOS (referente_siniestros y
+   jefe_de_siniestros), por decision de negocio. Asi que si probas con un
+   supervisor y te deja autorizar, en produccion NO va a poder. Para que la
+   prueba sea representativa, usa referente o jefe para autorizar, y para el
+   rol de "gestor sin permiso" NO uses supervisor ni gerente.
+
+2. UNA DENUNCIA DE PRUEBA con el paciente disponible, y ojala 2 o 3 para no
+   pisar casos entre pruebas.
+
+3. Anota el ID DE TURNO y el ID DE TRASLADO de cada caso que armes. Los vas a
+   necesitar para verificar en base.
+
+4. QUERIES DE VERIFICACION (solo lectura, cambia los ids):
+
+   -- el pedido que se registro
+   SELECT * FROM cs.autorizaciones_traslado_duplicado
+    WHERE id_autorizacion = <ID_AUTORIZACION> ORDER BY 1 DESC;
+
+   -- estado del traslado y si es visible para logistica
+   SELECT id_traslado, id_turno, id_estado_traslado, id_estado_logistica_ida,
+          es_duplicado_autorizado
+     FROM cs.traslados WHERE id_turno = <ID_TURNO>;
+
+   -- los traslados del paciente ese dia (lo que ve el gate)
+   SELECT t.id_turno, DATE(t.fecha_turno) f, tr.id_traslado, tr.id_estado_traslado,
+          tr.id_estado_logistica_ida, tr.es_espontaneo_asociado
+     FROM cs.turnos t JOIN cs.traslados tr ON tr.id_turno = t.id_turno
+    WHERE t.id_denuncia = <ID_DENUNCIA> AND DATE(t.fecha_turno) = '<FECHA>';
+
+   LA CLAVE A MIRAR SIEMPRE: id_estado_logistica_ida.
+   - En NULL  = el traslado es INVISIBLE para logistica (pedido sin aprobar)
+   - Con valor = visible y despachable
+   Y es_duplicado_autorizado = 1 significa que la excepcion se aprobo.
+
+
+================================================================================
+BLOQUE A - ALTA DE TURNO NUEVO
+================================================================================
+Es el camino mas usado y el unico que estaba completo desde el principio.
+
+A1. [BASE] Alta sin conflicto
+    QUE HACER: cargar un turno con traslado para un dia en que el paciente NO
+      tiene ningun otro traslado.
+    QUE TIENE QUE PASAR: guarda normal, sin bloque de conflicto. El traslado
+      queda visible para logistica (id_estado_logistica_ida CON valor).
+
+A2. [BASE] Alta con conflicto, declarando el motivo (usuario CON permiso)
+    QUE HACER: con referente o jefe, cargar un segundo turno con traslado el
+      mismo dia. Elegir "declarar motivo" y seleccionar uno de los dos.
+    QUE TIENE QUE PASAR: aparece el bloque de conflicto con las tres salidas.
+      Guarda. Queda el motivo en la autorizacion y NO se genera pedido.
+
+A3. [OK] Alta con conflicto, pidiendo la autorizacion (usuario SIN permiso)
+    QUE HACER: con el gestor sin permiso, segundo turno con traslado el mismo
+      dia. Elegir "pedir autorizacion", escribir la justificacion, guardar.
+    QUE TIENE QUE PASAR:
+      - el bloque NO muestra boton "Enviar el pedido": muestra un texto que
+        dice que el pedido se registra al guardar el turno
+      - el turno se guarda
+      - se crea UNA fila en autorizaciones_traslado_duplicado, en PENDIENTE,
+        con la justificacion y con el id del gestor como solicitante
+      - el pedido apunta al traslado NUEVO, no al preexistente (verifica el
+        id_traslado de la fila contra el traslado del turno que acabas de crear)
+      - el traslado nuevo queda con id_estado_logistica_ida en NULL
+    POR QUE IMPORTA: si el pedido apunta al traslado viejo, al aprobar se marca
+      el equivocado y el nuevo se lo lleva logistica por duplicado.
+
+A4. [OK] Alta con conflicto, sin escribir la justificacion
+    QUE HACER: elegir "pedir autorizacion" y dejar el texto vacio.
+    QUE TIENE QUE PASAR: no deja avanzar / guardar. Sin justificacion no hay
+      pedido posible.
+
+A5. [BASE] Alta con conflicto, anulando el otro traslado
+    QUE HACER: elegir la salida de anular el traslado en conflicto.
+    QUE TIENE QUE PASAR: se cancela el otro traslado, desaparece el conflicto,
+      y el turno nuevo se guarda sin pedido ni motivo. Verifica en base que el
+      otro traslado quedo en estado 4 (Cancelado).
+
+A6. [BASE] Alta con conflicto, guardando sin traslado
+    QUE HACER: elegir la salida de guardar el turno sin traslado.
+    QUE TIENE QUE PASAR: el turno se crea sin traslado. Sin traslado no hay
+      duplicado, asi que no se pide nada.
+
+A7. [OK] Alta con conflicto, TRANSPORTE PUBLICO
+    QUE HACER: igual que A3 pero con tipo de traslado micro o aereo.
+    QUE TIENE QUE PASAR: mismo comportamiento. El pedido llena
+      id_traslado_transporte_publico y deja id_traslado en NULL. NUNCA las dos
+      columnas a la vez: verificalo en base.
+
+
+================================================================================
+BLOQUE B - PROGRAMAR TURNO (reprogramacion)
+================================================================================
+
+B1. [OK] Programar un turno para un dia que ya tiene traslado
+    QUE HACER: turno sin fecha (o reprogramar), poner una fecha en la que el
+      paciente ya tiene otro traslado vigente.
+    QUE TIENE QUE PASAR: aparece el bloque de conflicto con las tres salidas.
+
+B2. [OK] Pedir la autorizacion DESDE programar turno
+    QUE HACER: en B1, con el gestor sin permiso, elegir "pedir autorizacion",
+      escribir la justificacion y apretar "Enviar el pedido".
+    QUE TIENE QUE PASAR: el pedido se registra. Antes de este arreglo el boton
+      daba error porque el request salia sin el solicitante.
+    VERIFICAR: la fila del pedido tiene id_solicitante con el id del gestor.
+      Si queda en NULL, el dictamen no le vuelve nunca.
+
+B3. [OK] Programar un turno cuyo unico traslado esta CANCELADO
+    QUE HACER: buscar un turno cuyo traslado este cancelado, y programarlo para
+      un dia en que el paciente tenga otro traslado vigente.
+    QUE TIENE QUE PASAR: NO tiene que bloquear por el traslado cancelado del
+      propio turno. Un remis cancelado no va a salir, asi que no cuenta.
+    POR QUE IMPORTA: esto pasaba unas 137 veces por mes en produccion. El
+      gestor quedaba obligado a declarar "Autorizado por Supervision" para un
+      viaje que nunca iba a existir. Es el caso que mas volumen tenia.
+
+B5. [OK] DOS CARGAS SEGUIDAS PARA LA MISMA FECHA (bug encontrado el 24/08)
+    QUE HACER: sin cerrar sesion ni recargar la pagina:
+      1. cargar un turno con traslado para una fecha X
+      2. cargar OTRO turno con traslado para la MISMA fecha X
+      3. y un tercero para la misma fecha X
+    QUE TIENE QUE PASAR: en los tres, si hay conflicto, aparece el bloque con las
+      salidas.
+    QUE PASABA ANTES DEL ARREGLO: en la primera carga aparecia el bloque. En la
+      segunda y la tercera, NO: se veia solamente el snackbar "el paciente ya
+      tiene un traslado ese dia" y ninguna pantalla para resolverlo. El gestor
+      quedaba con el aviso y sin salida.
+    POR QUE PASABA: la consulta de conflictos se guardaba en cache del lado del
+      navegador, y sus parametros (denuncia + fecha) no cambian entre una carga y
+      la siguiente. Asi que la segunda vez el front NO le preguntaba al servidor:
+      usaba la respuesta de la primera consulta, de cuando el estado de los
+      traslados era otro. En la pestaña de red no se veia ninguna llamada, asi
+      que parecia que el front no consultaba nada.
+    COMO CONFIRMAR QUE EL ARREGLO ANDA: abri la pestaña de red del navegador y
+      fijate que en CADA carga haya una llamada a `conflictos-mismo-dia`. Si en la
+      segunda no aparece, el arreglo no esta desplegado.
+    WORKAROUND si te toca un ambiente sin el arreglo: cerrar y reabrir el drawer,
+      o recargar la pagina, entre carga y carga.
+
+B4. [OK] Programar un turno que tiene DOS traslados
+    QUE HACER: hace falta armar el dato. La forma es el caso I3 (espontaneo
+      colgado de un turno que ya tenia traslado). Despues, programar ese turno.
+    QUE TIENE QUE PASAR: NO tiene que dar error 500. Antes el sistema pedia
+      "el" traslado del turno y con dos explotaba.
+    EN BASE: SELECT id_turno, COUNT(*) FROM cs.traslados WHERE id_turno IS NOT
+      NULL GROUP BY id_turno HAVING COUNT(*) > 1;   -- para encontrar candidatos
+
+
+================================================================================
+BLOQUE C - EDICION DE TURNO
+================================================================================
+
+C1. [OK] Editar un turno moviendole la fecha a un dia con conflicto
+    QUE HACER: editar un turno con traslado y cambiarle la fecha a un dia en
+      que el paciente ya tiene otro traslado.
+    QUE TIENE QUE PASAR: aparece el bloque de conflicto.
+
+C2. [OK] Pedir la autorizacion DESDE la edicion
+    QUE HACER: en C1, con el gestor sin permiso, pedir la autorizacion.
+    QUE TIENE QUE PASAR: se registra el pedido. ESTO ES NUEVO: antes el sistema
+      te dejaba guardar y NO registraba nada. Decia "guardado con exito" y no
+      quedaba pedido, ni motivo, ni rastro; el traslado quedaba invisible para
+      logistica para siempre y el paciente sin viaje.
+    VERIFICAR SI O SI en base: que exista la fila del pedido, y que su
+      id_traslado sea el del turno que editaste, NO el del conflicto.
+
+C3. [OK] Editar el MISMO turno sin cambiar de dia
+    QUE HACER: editar un turno que ya tiene traslado, sin moverle la fecha.
+    QUE TIENE QUE PASAR: su propio traslado NO cuenta como conflicto contra si
+      mismo. No tiene que aparecer el bloque si no hay OTRO traslado ese dia.
+
+C4. [OK] Editar cambiando el tipo de traslado (remis -> transporte publico)
+    QUE HACER: editar un turno con conflicto y cambiarle el tipo de traslado.
+    QUE TIENE QUE PASAR: se cancela el traslado viejo y se crea el nuevo del
+      otro tipo. Si pediste la autorizacion, el pedido tiene que apuntar al
+      traslado NUEVO (y a la columna que corresponde al tipo).
+
+C5. [BASE] Editar un turno cuyo traslado ya lo procesò logistica
+    QUE HACER: buscar un turno con traslado ya procesado y editarlo.
+    QUE TIENE QUE PASAR: lo rechaza con el mensaje de que no se puede editar
+      porque tiene traslados procesados. Esto es preexistente y tiene que seguir
+      funcionando.
+
+C6. [OK] Editar y que falle algo en el medio
+    QUE HACER: dificil de forzar desde la UI. Si podes, provocar un error
+      (por ejemplo un dato invalido que reviente del lado del servidor) al
+      guardar una edicion con pedido de excepcion.
+    QUE TIENE QUE PASAR: NO tiene que quedar la edicion hecha a medias. Ni el
+      turno editado, ni el traslado, ni el pedido. Todo o nada.
+    POR QUE: se le agrego rollbackFor a la edicion. Antes, una excepcion de
+      cierto tipo dejaba todo commiteado igual.
+
+
+================================================================================
+BLOQUE D - EDICION DE TURNO DE REHABILITACION
+================================================================================
+
+D1. [OK] Editar un turno de rehabilitacion con conflicto
+    QUE HACER: entrar a un plan de rehabilitacion, editar una sesion que tenga
+      traslado, y ponerle una fecha con conflicto.
+    QUE TIENE QUE PASAR: aparece el bloque, y al ELEGIR UNA SALIDA el boton
+      "Guardar" se habilita.
+    POR QUE IMPORTA: este era el peor de los cuatro drawers. La eleccion del
+      gestor se perdia en el aire (el sistema no tenia donde guardarla) asi que
+      "Guardar" quedaba gris PARA SIEMPRE, y como el campo de motivo solo se
+      muestra a quien puede autorizar, no habia ninguna salida: cancelar y
+      perder la edicion. Probalo con el gestor SIN permiso, que es el caso que
+      quedaba trabado.
+
+D2. [OK] Editar rehabilitacion pidiendo la autorizacion
+    QUE HACER: en D1, elegir "pedir autorizacion" y enviarlo.
+    QUE TIENE QUE PASAR: el pedido se registra con el solicitante correcto.
+      Antes fallaba porque el request salia sin el id del gestor.
+
+D3. [OK] Rehabilitacion de OTRA REGION DEL CUERPO, mismo dia
+    QUE HACER: paciente con dos planes de rehabilitacion de regiones distintas
+      (por ejemplo rodilla y hombro), los dos con traslado, el mismo dia.
+    QUE TIENE QUE PASAR: AHORA SI aparece el bloque de conflicto.
+    POR QUE CAMBIO: antes logistica lo descartaba como caso legitimo y no
+      informaba conflicto, pero el gate del servidor no sabe de regiones y
+      contaba el traslado igual. Resultado: el bloque no aparecia Y el servidor
+      rechazaba el turno. El gestor quedaba trabado sin nada en pantalla.
+      Criterio: el traslado es del paciente, no de la region. Son dos remises
+      el mismo dia y tiene que quedar declarado o autorizado, aunque sea
+      legitimo.
+    OJO: son unos 23 casos por mes que ANTES pasaban solos y ahora piden
+      intervencion. Fijate si la friccion es tolerable en la practica.
+    FALTA (decision de negocio): no hay un motivo que describa este caso. Los
+      dos que existen dicen "Autorizado por Auditoria Medica" y "Autorizado por
+      Supervision", y aca nadie autorizo nada. Sin un motivo propio el gestor
+      va a declarar en falso. Ver el bloque N.
+
+
+================================================================================
+BLOQUE E - ALTA DE PLAN DE REHABILITACION (la tanda)
+================================================================================
+Este bloque es el que tiene el arreglo mas grande y el que mas conviene mirar
+con lupa: toca la creacion de la autorizacion, los N turnos y los traslados en
+una sola transaccion.
+
+E1. [OK] Generar autorizacion de un plan con conflicto en UNA fecha
+    QUE HACER: dar de alta un plan de rehabilitacion (por ejemplo 10 sesiones)
+      con traslado, donde UNA de las fechas choque con un traslado que el
+      paciente ya tiene.
+    QUE TIENE QUE PASAR: aparece el bloque, y muestra CUAL fecha choca (no un
+      aviso generico para todas).
+
+E2. [OK] Pedir la autorizacion en el alta de la tanda
+    QUE HACER: en E1, con el gestor sin permiso, elegir "pedir autorizacion",
+      escribir la justificacion y guardar.
+    QUE TIENE QUE PASAR:
+      - el plan se crea
+      - se registra el pedido
+    ESTO ES NUEVO Y ES EL CASO MAS IMPORTANTE DE PROBAR. Antes: el cartel decia
+      "el pedido se registra al guardar el turno", el gestor guardaba, y NO se
+      registraba nada. Plan con traslado duplicado, sin motivo, sin pedido y sin
+      nadie a quien autorizar. Peor que declarar en falso, porque ni rastro
+      quedaba.
+
+E3. [OK] Cuantos pedidos se registran en una tanda
+    QUE HACER: alta de plan de 10 sesiones donde SOLO 2 fechas tengan conflicto,
+      pidiendo la autorizacion.
+    QUE TIENE QUE PASAR: se registran DOS pedidos, uno por cada traslado en
+      conflicto. NO diez (uno por sesion) ni uno solo para toda la tanda.
+    POR QUE ASI: uno por sesion le llena la bandeja al referente con pedidos que
+      no hacen falta. Uno solo por la tanda deja al otro traslado en conflicto
+      sin nada que lo destape, porque al aprobar solo se libera el traslado al
+      que el pedido apunta: quedaria invisible para logistica para siempre.
+    VERIFICAR: contar las filas en autorizaciones_traslado_duplicado para esa
+      autorizacion, y que cada una apunte a un traslado distinto.
+
+E4. [OK] Aprobar los pedidos de una tanda
+    QUE HACER: aprobar los dos pedidos de E3.
+    QUE TIENE QUE PASAR: los DOS traslados en conflicto pasan a visibles para
+      logistica y con la marca de duplicado autorizado. Ninguno queda en NULL.
+
+E5. [OK] Alta de tanda sin escribir justificacion
+    QUE HACER: elegir "pedir autorizacion" y no escribir nada.
+    QUE TIENE QUE PASAR: no deja guardar, o guarda sin pedido pero tampoco
+      pasando el conflicto por alto. Lo que NO puede pasar es guardar el plan
+      con el conflicto sin registrar nada.
+
+E6. [OK] Programar una tanda de rehabilitacion con conflicto
+    QUE HACER: plan de sesiones sin fecha, y programarlas todas juntas, con
+      conflicto en una de las fechas.
+    QUE TIENE QUE PASAR: NO se programa NINGUNA. Se cortan todas y el mensaje
+      nombra las fechas en conflicto, para que el gestor sepa cuales mover.
+    POR QUE: programar 6 de 10 sesiones no es media solucion, es un plan roto
+      que alguien completa a mano.
+
+E7. [OK] Tanda con conflicto en VARIAS fechas
+    QUE HACER: como E6 pero con 3 o 4 fechas en conflicto.
+    QUE TIENE QUE PASAR: el mensaje nombra TODAS las fechas, no solo la primera.
+
+
+================================================================================
+BLOQUE F - AUTORIZAR Y RECHAZAR
+================================================================================
+
+F1. [BASE] El referente ve los pedidos pendientes
+    QUE HACER: entrar con referente_siniestros a la pestaña de pedidos.
+    QUE TIENE QUE PASAR: ve los pedidos en PENDIENTE, con la justificacion, quien
+      pidio y cuando. NUNCA un id interno en pantalla.
+
+F2. [BASE] Aprobar un pedido
+    QUE HACER: aprobar uno de los pedidos.
+    QUE TIENE QUE PASAR:
+      - el pedido pasa a APROBADA
+      - el traslado pasa a VISIBLE para logistica (id_estado_logistica_ida deja
+        de ser NULL)
+      - queda es_duplicado_autorizado = 1
+      - en la grilla de logistica aparece con la marca
+
+F3. [BASE] Rechazar un pedido
+    QUE HACER: rechazar un pedido, con dictamen.
+    QUE TIENE QUE PASAR: el pedido pasa a RECHAZADA y el traslado se cancela.
+      El traslado NO tiene que volverse visible para logistica.
+
+F4. [BASE] El jefe de siniestros tambien puede
+    QUE HACER: lo mismo que F2 con jefe_de_siniestros.
+    QUE TIENE QUE PASAR: puede resolver igual que el referente.
+
+F5. [OK] Un gestor sin permiso NO puede autorizar
+    QUE HACER: intentar llegar a la pestaña de resolucion con el gestor comun.
+    QUE TIENE QUE PASAR: no la ve, y si se fuerza la llamada al servidor,
+      tampoco puede. El permiso se valida del lado del servidor, no alcanza con
+      esconder el boton.
+
+F6. [BASE] IMPORTANTE - representatividad de perfiles
+    En stage el permiso lo tienen CUATRO perfiles: referente, jefe, gerente y
+    supervisor. En PRODUCCION van a ser DOS: referente y jefe.
+    QUE PROBAR: que gerente y supervisor puedan en stage NO prueba nada sobre
+      produccion. Si necesitas validar que un supervisor NO pueda autorizar,
+      eso hay que probarlo distinto o pedir que stage se alinee a los 2 perfiles
+      de produccion. Decidilo antes de dar por validado el circuito de permisos.
+
+F7. [BASE] Solo cuenta el ULTIMO pedido
+    QUE HACER: sobre la misma autorizacion, generar un pedido y APROBARLO.
+      Despues generar OTRO pedido y RECHAZARLO.
+    QUE TIENE QUE PASAR: el rechazo manda. El aprobado viejo NO tiene que
+      neutralizar el rechazo nuevo, o sea: el turno no se puede cargar
+      apoyandose en el aprobado anterior.
+    POR QUE IMPORTA: si esto no valiera, alcanzaria con pedir la excepcion, que
+      te la nieguen, y cargar el traslado igual.
+
+F8. [ABIERTO] Dos personas resolviendo el mismo pedido a la vez
+    QUE HACER: dos navegadores, dos usuarios que puedan autorizar, el mismo
+      pedido abierto en los dos. Uno aprueba y el otro rechaza casi simultaneo.
+    QUE PASA HOY: no hay bloqueo real. Los dos pueden escribir, y el traslado
+      puede quedar aprobado Y cancelado a la vez.
+    ESTA ABIERTO. Confirmalo si podes reproducirlo, y sirve para dimensionar si
+      vale arreglarlo antes de salir (depende de cuantos autorizantes trabajen
+      en paralelo).
+
+F9. [ABIERTO] Rechazar SIN escribir dictamen
+    QUE HACER: rechazar un pedido dejando el dictamen vacio.
+    QUE PASA HOY: lo deja. No hay validacion.
+    CONSECUENCIA: el gestor recibe el rechazo sin saber por que. Rompe la vuelta
+      util del circuito.
+
+F10. [ABIERTO] Pedido sin ningun traslado asociado
+    QUE HACER: dificil desde la UI. Si aparece un pedido con id_traslado y
+      id_traslado_transporte_publico los dos en NULL, es este caso.
+    QUE PASA HOY: al aprobarlo falla y vuelve a PENDIENTE. Queda un pedido que
+      NADIE puede resolver nunca, inflando la bandeja del autorizante.
+    EN BASE: SELECT * FROM cs.autorizaciones_traslado_duplicado
+             WHERE id_traslado IS NULL AND id_traslado_transporte_publico IS NULL;
+
+
+================================================================================
+BLOQUE G - LA VUELTA AL SOLICITANTE
+================================================================================
+
+G1. [BASE] El gestor ve el resultado de lo que pidio
+    QUE HACER: con el gestor que pidio (A3, C2, D2, E2), entrar a la pestaña de
+      duplicados resueltos.
+    QUE TIENE QUE PASAR: ve el resultado (aprobado o rechazado), con el dictamen.
+    OJO: esta pestaña filtra por el ID DEL SOLICITANTE. Si el pedido quedo sin
+      solicitante, el gestor NO lo ve nunca. Es la razon por la que B2 y D2
+      importan tanto.
+
+G2. [BASE] El contador de resultados nuevos
+    QUE HACER: mirar el contador antes y despues de que le resuelvan un pedido.
+    QUE TIENE QUE PASAR: sube cuando hay un resultado sin ver.
+
+G3. [BASE] Marcar como visto
+    QUE HACER: abrir la pestaña y despues volver.
+    QUE TIENE QUE PASAR: el contador baja. No vuelve a avisar por lo mismo.
+
+G4. [OK] Que el resultado le vuelva a QUIEN PIDIO, no a otro
+    QUE HACER: dos gestores distintos piden dos excepciones. Resolverlas.
+    QUE TIENE QUE PASAR: cada uno ve SOLO la suya.
+
+
+================================================================================
+BLOQUE H - GRILLA DE LOGISTICA
+================================================================================
+
+H1. [BASE] Traslado con pedido PENDIENTE no aparece
+    QUE HACER: con el usuario de logistica, buscar el traslado del caso A3 (con
+      pedido pendiente).
+    QUE TIENE QUE PASAR: NO aparece en la grilla. No se puede asignar agencia ni
+      despachar.
+    POR QUE: es la clave del circuito. Mientras nadie autorice, ese traslado no
+      existe para logistica.
+
+H2. [BASE] Aprobado, aparece con marca
+    QUE HACER: aprobar el pedido y volver a la grilla de logistica.
+    QUE TIENE QUE PASAR: ahora si aparece, y con la marca de duplicado
+      autorizado.
+
+H3. [BASE] Las tres grillas de logistica
+    QUE HACER: revisar las tres: remis/ambulancia, aereos e internos.
+    QUE TIENE QUE PASAR: las tres cargan sin error. Si alguna se cae con un
+      error de columna, es que el stored procedure y el codigo no estan
+      alineados: avisá enseguida.
+
+H4. [ABIERTO] Quien autorizo la excepcion
+    QUE HACER: pasar el mouse por la marca del duplicado autorizado.
+    QUE PASA HOY: el front esta preparado para mostrar el nombre de quien
+      autorizo, pero el servidor nunca lo envia. Se ve un texto generico.
+    NO ROMPE NADA, pero logistica no puede saber quien autorizo. Confirmá si eso
+      les hace falta.
+
+H5. [ABIERTO] El icono se comparte con otro significado
+    QUE HACER: mirar una fila con "requiere revision" y una con "duplicado
+      autorizado" en la misma grilla.
+    QUE PASA HOY: usan el MISMO icono. Logistica ya venia leyendo ese icono como
+      "requiere revision" en produccion.
+    MIRALO CON GENTE DE LOGISTICA: es el tipo de cosa que confunde en el uso
+      diario y no se ve en una prueba de escritorio.
+
+H6. [BASE] Traslados internos
+    QUE HACER: revisar la grilla de traslados internos.
+    QUE TIENE QUE PASAR: no muestra marca de duplicado. Es correcto: son
+      traslados de personal, no de pacientes.
+
+
+================================================================================
+BLOQUE I - TRASLADOS ESPONTANEOS
+================================================================================
+IMPORTANTE: los espontaneos NO pasan por el gate. Esto es a proposito (la
+urgencia manda) pero hay que confirmarlo y entender las consecuencias.
+
+I1. [OK] Crear un espontaneo desde LOGISTICA con conflicto
+    QUE HACER: con el usuario de logistica, crear un traslado espontaneo para un
+      paciente que YA tiene un traslado ese dia.
+    QUE TIENE QUE PASAR: se crea sin ningun bloqueo, sin bloque de conflicto y
+      sin pedir motivo. NO tiene que frenarlo nada.
+    POR QUE: el espontaneo es urgente. Si esto se frena, el arreglo esta mal.
+
+I2. [OK] Crear un espontaneo desde CEM (el front del call center)
+    QUE HACER: desde el drawer de traslados del call center, crear un espontaneo
+      con turno asociado, para un paciente que ya tiene traslado ese dia.
+    QUE TIENE QUE PASAR: se crea sin bloqueo. Tampoco pasa por el gate: CEM crea
+      el turno por otro servicio.
+
+I3. [OK] Espontaneo COLGADO de un turno que ya existe
+    QUE HACER: desde logistica, crear un espontaneo indicando un turno existente
+      que YA tiene traslado.
+    QUE TIENE QUE PASAR: se crea, y ese turno queda con DOS traslados.
+    ESTE CASO SIRVE PARA ARMAR EL DATO DE B4. Anotate el id del turno.
+    EN BASE: verifica que hay 2 filas en traslados con el mismo id_turno.
+
+I4. [OK] Despues de un espontaneo, cargar un turno normal el mismo dia
+    QUE HACER: paciente con un espontaneo ya creado hoy. Ahora, como gestor,
+      cargar un turno con traslado para hoy.
+    QUE TIENE QUE PASAR: SI aparece el bloque de conflicto. El espontaneo cuenta
+      como traslado vigente.
+    Y ACA ESTA EL PROBLEMA A MIRAR: no hay motivo que diga "el paciente tuvo un
+      espontaneo". Los dos que existen afirman una autorizacion que nadie dio.
+      Fijate que hace el gestor en la practica: declarar en falso, o esperar una
+      autorizacion. Son unos 67 casos por mes. Ver bloque N.
+
+
+================================================================================
+BLOQUE J - ORTOPEDIA
+================================================================================
+
+J1. [BASE] Entrega de ortopedia con traslado, SIN conflicto
+    QUE HACER: entregar un pedido de ortopedia que requiera traslado, en un dia
+      en que el paciente no tenga otro traslado.
+    QUE TIENE QUE PASAR: funciona normal.
+
+J2. [ABIERTO] Entrega de ortopedia con traslado, CON conflicto
+    QUE HACER: mismo caso pero en un dia en que el paciente ya tenga traslado.
+    QUE PASA HOY: el servicio de ortopedia recibe el rechazo del gate y NO lo
+      sabe interpretar: lo convierte en un error de sistema generico. El usuario
+      ve "error" sin explicacion y sin ninguna salida.
+    ESTA ABIERTO A PROPOSITO. Medido en produccion: ese camino tiene UN caso en
+      ocho meses, asi que no bloquea la salida. Pero conviene confirmar el
+      sintoma en stage para saber que le va a pasar al usuario de ortopedia el
+      dia que ocurra.
+    LO QUE HAY QUE PEDIRLE AL EQUIPO DE ORTOPEDIA: que distinga este rechazo de
+      un error real, y que su formulario acepte el motivo o la justificacion.
+      Antes de que empiecen a usar el flujo en volumen.
+
+
+================================================================================
+BLOQUE K - CAMINOS QUE NO PASAN POR EL GATE
+================================================================================
+Estos son los agujeros conocidos. Probarlos sirve para saber que NO cubre el
+circuito, y para no prometer un numero que no se va a cumplir.
+
+K1. [ABIERTO] Portal de Prestadores
+    QUE HACER: si tenes acceso, cargar un traslado desde el portal para un
+      paciente que ya tiene uno ese dia.
+    QUE PASA HOY: pasa sin control. Ese servicio escribe la tabla directo.
+
+K2. [ABIERTO] Aprobar la AUTORIZACION del turno mientras el pedido esta pendiente
+    QUE HACER: este es el mas importante de este bloque, probalo si o si.
+      1. gestor sin permiso carga un turno con conflicto y pide la excepcion
+      2. verifica que el traslado esta invisible para logistica (NULL)
+      3. AHORA, con otro usuario, aprobar la AUTORIZACION DEL TURNO (que es una
+         accion distinta, mas comun, y la hace gente que no ve los pedidos de
+         duplicado)
+      4. volver a mirar la grilla de logistica
+    QUE PASA HOY: el traslado BAJA a la grilla de logistica SIN la marca de
+      duplicado autorizado, aunque el pedido siga pendiente. Logistica lo ve
+      como duplicado no autorizado y lo cancela, o lo despacha sin que nadie
+      autorizara la excepcion.
+    POR QUE IMPORTA: son las ~133 cancelaciones por mes que el circuito viene a
+      eliminar. Si este agujero queda abierto, el numero no va a bajar como se
+      espera. Confirmalo y decidamos.
+
+K3. [ABIERTO] Programar el turno destapa el traslado
+    QUE HACER: igual que K2 pero en lugar de aprobar la autorizacion, programar
+      el turno.
+    QUE PASA HOY: mismo efecto. Y en transporte publico, sin exigir siquiera que
+      la autorizacion este aprobada.
+
+K4. [ABIERTO] Otros modulos que escriben turnos y traslados
+    Hay varios servicios internos que crean turnos o traslados sin pasar por el
+    gate (auditoria, auditoria de facturacion, consultas y reclamos, el sistema
+    viejo). No hace falta probarlos uno por uno, pero si aparece un traslado
+    duplicado que "no deberia haber pasado", el origen puede ser uno de estos.
+
+
+================================================================================
+BLOQUE L - CANCELACION DE TRASLADOS
+================================================================================
+
+L1. [BASE] Anular el traslado en conflicto desde el bloque
+    QUE HACER: usar la salida de anular del bloque de conflicto.
+    QUE TIENE QUE PASAR: el mensaje dice lo que REALMENTE paso con cada tramo.
+      Si un tramo no se pudo cancelar, tiene que decirlo, no dar exito generico.
+
+L2. [BASE] Cancelacion parcial (ida y vuelta)
+    QUE HACER: anular un traslado de ida y vuelta donde uno de los tramos ya
+      este procesado por logistica.
+    QUE TIENE QUE PASAR: se informa que fue parcial y CUAL tramo quedo. Que no
+      diga "cancelado" a secas.
+
+L3. [ABIERTO] Cancelacion que el servidor no puede confirmar
+    QUE HACER: dificil de forzar. Si en una anulacion el sistema no puede
+      confirmar el resultado, mira que muestra la pantalla.
+    QUE PASA HOY: hay un camino donde el traslado desaparece de la lista, la
+      pantalla lo lee como exito, y el traslado sigue vigente. Es la falla que
+      este arreglo venia a eliminar, en un caso borde.
+
+L4. [BASE] Anular un traslado ya procesado
+    QUE HACER: intentar anular un traslado que logistica ya procesò.
+    QUE TIENE QUE PASAR: no lo deja, con mensaje claro.
+
+
+================================================================================
+BLOQUE M - REGRESION (lo que no debe romperse)
+================================================================================
+Esto es lo que hay que revisar SI O SI, porque la promocion toco stored
+procedures que alimentan pantallas completas.
+
+M1. [BASE] Grilla de turnos de tramitadores - TODAS las pestañas
+    QUE HACER: abrir la grilla de turnos y recorrer TODAS las pestañas, no solo
+      las nuevas del duplicado.
+    QUE TIENE QUE PASAR: todas cargan. Si UNA se cae con error, avisá enseguida:
+      significa que el stored procedure y el codigo no estan alineados, y en
+      produccion eso tira la grilla completa para todos los usuarios.
+
+M2. [BASE] Filtros de la grilla de turnos
+    QUE HACER: probar los filtros de siempre (fecha, estado, centro medico).
+    QUE TIENE QUE PASAR: funcionan igual que antes.
+
+M3. [BASE] Alta de turno SIN traslado
+    QUE HACER: cargar un turno normal, sin traslado.
+    QUE TIENE QUE PASAR: nada del circuito de duplicados aparece. Sin traslado
+      no hay duplicado posible.
+
+M4. [BASE] Turno de cirugia y turno con materiales quirurgicos
+    QUE HACER: alta y edicion de un turno de cirugia.
+    QUE TIENE QUE PASAR: funciona igual. Es un camino que comparte codigo con el
+      alta y la edicion que se tocaron.
+
+M5. [BASE] Plan de rehabilitacion completo, de punta a punta
+    QUE HACER: crear un plan, programar las sesiones, editar una, anular otra.
+      Sin conflictos de traslado.
+    QUE TIENE QUE PASAR: todo el flujo normal funciona. Se toco bastante codigo
+      de este camino.
+
+M6. [ABIERTO] Se cae la consulta de conflictos
+    QUE HACER: si podes, cortar el servicio que responde "hay conflicto?" (o
+      probarlo justo mientras se despliega ese servicio).
+    QUE PASA HOY: el bloque NO se muestra, pero el sistema sigue creyendo que
+      hay un conflicto pendiente. "Siguiente" queda gris, sin campo visible y
+      sin mensaje, y el gestor pierde lo que cargo.
+    ESTA ABIERTO. Vale confirmarlo porque es a un hipo de servidor de distancia,
+      y el sintoma para el usuario es "el sistema se colgo".
+
+M7. [BASE] Los reportes y listados que usan turnos
+    QUE HACER: sacar algun reporte o listado que involucre turnos con traslado.
+    QUE TIENE QUE PASAR: los numeros siguen dando igual que antes de la
+      promocion.
+
+
+================================================================================
+BLOQUE N - DECISIONES DE NEGOCIO PENDIENTES
+================================================================================
+No son casos de prueba: son cosas a definir. Las pongo acá porque van a
+aparecer solas mientras probas los bloques D e I.
+
+N1. FALTAN MOTIVOS QUE DESCRIBAN LOS CASOS REALES
+    Hoy hay solo dos motivos, y los dos dicen "Autorizado por ...":
+      1. Autorizado por Auditoria Medica
+      2. Autorizado por Supervision
+    Hay al menos dos situaciones donde NADIE autorizo nada y el gestor igual
+    tiene que elegir uno:
+      - el paciente tuvo un traslado ESPONTANEO antes (~67 casos por mes)
+      - rehabilitacion de REGIONES DISTINTAS el mismo dia (~23 casos por mes)
+    Sin un motivo propio, el gestor tiene dos salidas y las dos son malas:
+    declarar algo que no paso, o esperar una autorizacion para algo legitimo.
+    Son ~90 casos por mes.
+    Agregar motivos es solo un INSERT en la tabla: aparecen en el combo de todos
+    los servicios sin tocar codigo ni redesplegar. Falta que negocio apruebe los
+    textos.
+
+N2. LOS PERFILES DE STAGE NO SON LOS DE PRODUCCION
+    Stage: referente, jefe, gerente y supervisor (4).
+    Produccion: referente y jefe (2).
+    Decidir si stage se alinea a produccion antes de dar por validado el
+    circuito de permisos, o si se acepta que esa parte no queda representativa.
+
+N3. EL NUMERO QUE EL CIRCUITO PROMETE BAJAR
+    El documento del cambio habla de cerrar ~58 casos por mes. Ese numero NO
+    incluye los duplicados que arrancan con un espontaneo (~400 por mes), porque
+    ese camino no pasa por el gate. Conviene ajustar la expectativa antes de
+    medir el exito, para no evaluar el circuito contra un numero que no puede
+    llegar a cero.
+
+N4. QUE HACER CON LOS AGUJEROS DEL BLOQUE K
+    K2 y K3 son los que mas pesan: dejan visible un traslado con el pedido
+    todavia pendiente, y sin la marca. Si no se cierran, las ~133 cancelaciones
+    por mes no van a bajar como se espera.
+
+
+================================================================================
+RESUMEN - QUE MIRAR PRIMERO SI TENES POCO TIEMPO
+================================================================================
+Si solo podes hacer diez casos, estos:
+
+  1. A3  - alta con conflicto pidiendo autorizacion (el camino principal)
+  2. E2  - alta de tanda pidiendo autorizacion (el arreglo mas grande)
+  3. E3  - cuantos pedidos se registran en una tanda
+  4. D1  - editar rehabilitacion (el drawer que estaba trabado)
+  5. C2  - pedir autorizacion desde la edicion (registraba nada antes)
+  6. B3  - programar con traslado cancelado (137 casos por mes)
+  6b. B5 - dos cargas seguidas para la misma fecha (el bug del cache)
+  7. M1  - grilla de turnos completa, todas las pestañas (riesgo de regresion)
+  8. H1  - el traslado con pedido pendiente no aparece en logistica
+  9. F7  - solo cuenta el ultimo pedido
+ 10. K2  - aprobar la autorizacion destapa el traslado sin marca (agujero)
+
+Los cuatro primeros son los arreglos nuevos y no tienen ninguna prueba
+automatica todavia. M1 es el que puede tirar una pantalla entera. K2 es el que
+puede hacer que el circuito no cumpla lo que promete.
+
+
+================================================================================
+LO QUE NO SE PROBO EN NINGUN MOMENTO - PARA QUE LO SEPAS
+================================================================================
+Todos los arreglos de estos dias se verificaron con compilacion, tests
+unitarios y lectura de codigo. NADA se ejecuto contra la aplicacion andando.
+
+En particular:
+  - el registro del pedido en el alta de tanda (E2, E3) toca la creacion de la
+    autorizacion, los N turnos y los traslados en una sola transaccion. Es el
+    cambio mas delicado de todos.
+  - el cableado del drawer de edicion de rehabilitacion (D1) no se vio funcionar
+    en pantalla.
+  - los tests unitarios que existen en stage (80) cubren el gate, pero ninguno
+    cubre estos arreglos nuevos.
+
+Por eso este archivo. Lo que encuentres a mano es informacion que hoy no existe.
+
+Generado por Vanesa Burman - QA - 24/08/2026
