@@ -1,0 +1,31 @@
+meta {
+  name: Registra la factura emitida
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas/{idPrefactura}/factura
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "nroFactura": "A-0001-00012345",
+    "fechaFactura": "2026-08-15"
+  }
+}
+
+docs {
+  operationId: registrarFactura
+  description: Pasa la prefactura a FACTURADA y sus items a FACTURADO. No bloquea por movimientos sin revisar: la restriccion esta del lado del gestor, prefacturacion se entera. El aviso lo da el front con movimient
+}

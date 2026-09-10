@@ -1,0 +1,23 @@
+meta {
+  name: Cierra la prefactura y congela los importes
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas/{idPrefactura}/cerrar
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: cerrar
+  description: Copia a cada item el costo y el valor vigentes en ese momento y marca importesCongelados. Despues de cerrar, los items se sirven de la foto y NUNCA se recalculan: dato medido, los 226 detalles de juli
+}

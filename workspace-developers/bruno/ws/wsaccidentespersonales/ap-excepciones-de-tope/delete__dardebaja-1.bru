@@ -1,0 +1,23 @@
+meta {
+  name: Dar de baja una excepcion de tope
+  type: http
+  seq: 2
+}
+
+delete {
+  url: {{baseUrl}}/ap/topes/{idTope}
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: darDeBaja_1
+  description: Baja LOGICA: apaga la fila (activo = 0 + fecha y usuario de baja) y asienta el historial con tipo BAJA. NUNCA borra: el historial no tiene clave foranea y una fila borrada dejaria huerfana toda la evi
+}

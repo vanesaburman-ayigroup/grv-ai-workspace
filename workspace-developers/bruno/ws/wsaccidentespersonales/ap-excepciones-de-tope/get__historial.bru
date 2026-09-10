@@ -1,0 +1,23 @@
+meta {
+  name: Historial de cambios de un tope
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/ap/topes/{idTope}/historial
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: historial
+  description: Todos los cambios del tope, del mas nuevo al mas viejo: monto anterior y nuevo, ventana, flag de IVA, motivo, tipo de cambio, usuario y fecha. OJO con el criterio de los NULL: un valor nulo significa 
+}

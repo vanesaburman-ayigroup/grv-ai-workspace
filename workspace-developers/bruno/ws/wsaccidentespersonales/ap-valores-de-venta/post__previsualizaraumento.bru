@@ -1,0 +1,30 @@
+meta {
+  name: Previsualizar un aumento masivo por porcentaje
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/ap/valores-venta/aumento-masivo/previsualizacion
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "exclusiones": []
+  }
+}
+
+docs {
+  operationId: previsualizarAumento
+  description: Calcula, SIN ESCRIBIR NADA, cuantos valores se van a afectar y con que importes queda cada uno. Es la forma habitual de actualizar la grilla (porcentaje lineal, tipicamente por IPC acumulado) y el pas
+}

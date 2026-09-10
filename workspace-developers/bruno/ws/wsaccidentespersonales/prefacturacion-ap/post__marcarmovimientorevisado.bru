@@ -1,0 +1,23 @@
+meta {
+  name: Marca un movimiento como revisado
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/movimientos/{idMovimiento}/revisado
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: marcarMovimientoRevisado
+  description: Baja en uno el contador movimientosSinRevisar, que es lo que hace que el aviso previo a registrar la factura sirva: un contador que solo puede crecer termina prendido siempre y la gente aprende a igno
+}

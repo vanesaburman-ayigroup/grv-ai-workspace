@@ -1,0 +1,23 @@
+meta {
+  name: Detecta los cambios posteriores al armado
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas/{idPrefactura}/movimientos/detectar
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: detectarMovimientos
+  description: Relee las lineas del periodo y asienta lo que cambio desde que la prefactura se genero: CANCELACION (la prestacion ya no esta en el gestor), ALTA_TARDIA (entro una linea del periodo despues del armado
+}

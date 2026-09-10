@@ -1,0 +1,23 @@
+meta {
+  name: Dar de baja un valor manual de consumo
+  type: http
+  seq: 2
+}
+
+delete {
+  url: {{baseUrl}}/ap/valores-manuales/{idValorManual}
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: darDeBaja
+  description: Baja LOGICA: apaga la fila (activo = 0 + fecha, usuario y motivo de baja) y deja de sumar al consumo. NUNCA borra: un valor manual dado de baja tiene que seguir explicando un consumo historico que ya 
+}

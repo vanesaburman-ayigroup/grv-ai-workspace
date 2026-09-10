@@ -1,0 +1,23 @@
+meta {
+  name: Cargar o corregir un valor de venta
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/ap/valores-venta
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: crear
+  description: Registra el importe de venta de una prestacion para un cliente, con zona opcional y vigencia. Es tambien el camino de la CORRECCION: no hay endpoint de edicion del importe porque el importe NO se edit
+}

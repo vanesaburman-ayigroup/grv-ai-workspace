@@ -1,0 +1,23 @@
+meta {
+  name: Registrar una excepcion de tope
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/ap/topes
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: crear_2
+  description: Carga el tope de un asegurado que se aparta del tope general de la poliza. Exige motivo y asienta la fila correspondiente en el historial en la MISMA transaccion. Si ya existe un tope ACTIVO para la m
+}

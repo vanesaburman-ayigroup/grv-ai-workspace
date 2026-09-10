@@ -1,0 +1,23 @@
+meta {
+  name: Reabre una prefactura cerrada
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas/{idPrefactura}/reabrir
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: reabrir
+  description: Solo si esta CERRADA y no tiene numero de factura. Con factura devuelve 409 con el motivo: FACTURADA es el unico estado que no vuelve atras.
+}

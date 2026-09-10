@@ -1,0 +1,23 @@
+meta {
+  name: Guarda la observacion de la prefactura
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas/{idPrefactura}/observacion
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: observarPrefactura
+  description: Texto libre de la cabecera. Se admite tambien con la prefactura cerrada o facturada: una nota no cambia ningun importe.
+}

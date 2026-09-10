@@ -1,0 +1,23 @@
+meta {
+  name: Listado paginado de siniestros AP
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ap/cartera/siniestros
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: buscarSiniestros
+  description: Listado de la cartera AP con el paciente (apellido, nombre y documento), el cliente, y el consumo y el semaforo de cada siniestro. Pagina con limit/offset y ordena por un campo de una whitelist cerrad
+}

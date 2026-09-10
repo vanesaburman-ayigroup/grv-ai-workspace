@@ -1,0 +1,23 @@
+meta {
+  name: Grilla de valores de venta de un cliente
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/ap/valores-venta
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: buscar
+  description: Listado filtrable y paginado de la grilla de un cliente, con la prestacion (codigo y descripcion resueltos del catalogo), la zona cuando aplica, el importe SIN IVA, la vigencia, la version y el estado
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Listado paginado de excepciones de tope
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/ap/topes
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: buscar_2
+  description: Excepciones de tope de una poliza, paginadas con limit/offset. Por defecto solo las vigentes; con incluirInactivos=true tambien las dadas de baja, para poder explicar un tope que dejo de aplicar. Requ
+}

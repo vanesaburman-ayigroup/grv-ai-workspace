@@ -1,0 +1,23 @@
+meta {
+  name: Editar o ampliar una excepcion de tope
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/ap/topes/{idTope}
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: actualizar_1
+  description: Cambia la suma asegurada, la ventana o el flag de IVA de un tope vigente. El tipo de cambio se DEDUCE: si la suma nueva es mayor a la anterior queda como AMPLIACION, si no como CORRECCION. Exige motiv
+}

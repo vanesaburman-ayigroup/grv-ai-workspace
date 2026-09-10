@@ -1,0 +1,23 @@
+meta {
+  name: Lista prefacturas
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: buscar_3
+  description: Listado paginado. Filtra por cliente, periodo y estado. Los importes que devuelve son los GUARDADOS: en una prefactura CERRADA son la foto congelada, no un recalculo.
+}

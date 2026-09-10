@@ -1,0 +1,23 @@
+meta {
+  name: Distribucion de la cartera por nivel
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/ap/cartera/distribucion
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: obtenerDistribucion
+  description: Indicador de gerencia: cantidad de siniestros, proyeccion y excedente por nivel del semaforo, con las seis filas de la escala siempre presentes (incluida SIN_TOPE). Suma los tres agregados de cabecera
+}

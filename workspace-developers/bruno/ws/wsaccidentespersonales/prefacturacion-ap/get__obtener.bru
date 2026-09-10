@@ -1,0 +1,23 @@
+meta {
+  name: Trae una prefactura con sus totales
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas/{idPrefactura}
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: obtener
+  description: Incluye cantidadItems y movimientosSinRevisar, los dos contados server-side: contados sobre una pagina traida mentirian.
+}

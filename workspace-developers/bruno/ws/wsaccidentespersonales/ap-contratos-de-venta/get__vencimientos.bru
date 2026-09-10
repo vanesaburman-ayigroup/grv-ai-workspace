@@ -1,0 +1,23 @@
+meta {
+  name: Contratos a renegociar
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/ap/contratos-venta/vencimientos
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: vencimientos
+  description: Contratos que vencen dentro de los proximos 30 dias y contratos YA VENCIDOS sin vigencia nueva. Es el aviso del home del perfil comercial: un mes antes es el tiempo que lleva llegar a un acuerdo nuevo
+}

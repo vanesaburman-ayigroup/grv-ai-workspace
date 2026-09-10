@@ -1,0 +1,30 @@
+meta {
+  name: Aplicar un aumento masivo por porcentaje
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/ap/valores-venta/aumento-masivo
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "exclusiones": []
+  }
+}
+
+docs {
+  operationId: aplicarAumento
+  description: Aplica el porcentaje a la grilla de un cliente. Cada valor afectado se VERSIONA (copy-on-write): se cierra la vigencia anterior y se activa la nueva, conservando el historico. Todas las filas de la op
+}

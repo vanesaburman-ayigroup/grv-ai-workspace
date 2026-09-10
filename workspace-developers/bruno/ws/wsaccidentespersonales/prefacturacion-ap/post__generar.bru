@@ -1,0 +1,32 @@
+meta {
+  name: Genera la prefactura del cliente y el periodo
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "idCliente": 40,
+    "periodo": "2026-07",
+    "idLineas": []
+  }
+}
+
+docs {
+  operationId: generar
+  description: Toma las lineas indicadas, o todas las pendientes del periodo si no se indica ninguna, y guarda de cada una la foto de su importe. Rechaza con 400 explicable: una linea sin precio, una linea ya prefac
+}

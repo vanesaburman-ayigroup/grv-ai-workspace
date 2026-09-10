@@ -1,0 +1,23 @@
+meta {
+  name: Items congelados de la prefactura
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas/{idPrefactura}/items
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: items
+  description: Sirve lo guardado en los items. En este camino no hay recalculo posible: el mapper solo lee la fila y el servicio no tiene ninguna fuente de valorizacion a mano.
+}

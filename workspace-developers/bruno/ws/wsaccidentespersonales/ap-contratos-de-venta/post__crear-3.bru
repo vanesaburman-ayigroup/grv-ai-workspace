@@ -1,0 +1,23 @@
+meta {
+  name: Registrar o renovar la vigencia del contrato de un cliente
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/ap/contratos-venta
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: crear_3
+  description: Registra la ventana del acuerdo comercial con un cliente. Si el cliente ya tiene un contrato ABIERTO (sin fecha de fin) y el nuevo arranca despues, el anterior se cierra el dia anterior y pasa a HISTO
+}

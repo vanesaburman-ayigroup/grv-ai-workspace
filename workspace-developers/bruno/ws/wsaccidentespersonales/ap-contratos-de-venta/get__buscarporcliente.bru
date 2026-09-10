@@ -1,0 +1,23 @@
+meta {
+  name: Contratos de un cliente
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/ap/contratos-venta
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: buscarPorCliente
+  description: Devuelve las ventanas de acuerdo de un cliente, de la mas vieja a la mas nueva, con su estado y los dias que faltan para el vencimiento. Trae VIGENTE y HISTORICO juntos: una prestacion de hace dos año
+}

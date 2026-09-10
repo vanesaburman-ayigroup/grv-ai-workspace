@@ -1,0 +1,23 @@
+meta {
+  name: Parametros vigentes del semaforo
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/ap/parametros
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: obtenerParametros
+  description: Umbrales y flags de aviso de la configuracion activa. Los cortes 90 y 100 no figuran porque son fijos por definicion. Requiere el permiso ver_indicadores_ap
+}

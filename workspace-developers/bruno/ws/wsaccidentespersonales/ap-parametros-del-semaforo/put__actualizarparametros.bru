@@ -1,0 +1,23 @@
+meta {
+  name: Recalibrar los parametros del semaforo
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/ap/parametros
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: actualizarParametros
+  description: Reemplaza la configuracion vigente: mueve los cortes 40 y 70, silencia o habilita los avisos por nivel y prende o apaga el bloqueo al exceder el tope. Cualquier intento de mover los cortes 90 o 100 se
+}

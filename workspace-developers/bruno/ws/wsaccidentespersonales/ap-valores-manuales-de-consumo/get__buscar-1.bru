@@ -1,0 +1,23 @@
+meta {
+  name: Listado paginado de valores manuales
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/ap/valores-manuales
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: buscar_1
+  description: Valores manuales de un siniestro, paginados con limit/offset. Por defecto solo los vigentes; con incluirInactivos=true tambien los dados de baja, que es lo que permite explicar un consumo que bajo. Re
+}

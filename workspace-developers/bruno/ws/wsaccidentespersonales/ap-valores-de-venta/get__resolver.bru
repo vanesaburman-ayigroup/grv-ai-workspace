@@ -1,0 +1,23 @@
+meta {
+  name: Resolver el valor de venta aplicable a una fecha
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/ap/valores-venta/resolver
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: resolver
+  description: Devuelve el importe de venta que aplica a una prestacion de un cliente EN LA FECHA EN QUE LA PRESTACION SE REALIZO, no en la fecha de hoy. Es el caso cotidiano: el gestor se entera el 15 de una consul
+}

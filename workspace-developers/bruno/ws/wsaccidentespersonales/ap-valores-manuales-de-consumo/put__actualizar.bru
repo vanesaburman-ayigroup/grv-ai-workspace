@@ -1,0 +1,23 @@
+meta {
+  name: Editar un valor manual de consumo
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/ap/valores-manuales/{idValorManual}
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: actualizar
+  description: Reemplaza los datos de un valor manual vigente. El siniestro NO se puede mover: imputar el consumo a otro siniestro es dar de baja este y cargar uno nuevo. El monto, el flag de IVA y la marca de doble
+}

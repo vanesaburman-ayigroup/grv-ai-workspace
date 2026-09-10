@@ -1,0 +1,23 @@
+meta {
+  name: Descargar la grilla de un cliente en Excel
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/ap/valores-venta/exportar
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: exportar
+  description: Genera el .xlsx con las filas vigentes de la grilla de un cliente: prestacion (codigo y descripcion), zona cuando aplica, importe SIN IVA, moneda y vigencia. Es el archivo que se usa para negociar con
+}

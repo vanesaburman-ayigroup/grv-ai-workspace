@@ -1,0 +1,31 @@
+meta {
+  name: Previsualizar la duplicacion de la estructura de un contrato
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/ap/valores-venta/duplicacion/previsualizacion
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "exclusiones": [],
+    "importes": []
+  }
+}
+
+docs {
+  operationId: previsualizarDuplicacion
+  description: Muestra, SIN ESCRIBIR NADA, que prestaciones se van a crear en el cliente de destino y cuales estan EN CONFLICTO porque el destino ya tiene un valor vigente para ellas. Existe porque las prestaciones 
+}

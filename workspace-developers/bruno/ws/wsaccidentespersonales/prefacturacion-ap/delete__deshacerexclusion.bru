@@ -1,0 +1,23 @@
+meta {
+  name: Deshace la exclusion de un item
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{baseUrl}}/ap/prefacturacion/items/{idLinea}/excluir
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: deshacerExclusion
+  description: Devuelve el item a PREFACTURADO. Puede dar 409: mientras estuvo excluido la linea quedo libre y puede haber entrado en otra prefactura.
+}

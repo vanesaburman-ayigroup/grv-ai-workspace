@@ -1,0 +1,31 @@
+meta {
+  name: Duplicar la estructura de un contrato hacia otro cliente
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/ap/valores-venta/duplicacion
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "exclusiones": [],
+    "importes": []
+  }
+}
+
+docs {
+  operationId: aplicarDuplicacion
+  description: Crea en el cliente de destino las filas de grilla del cliente de origen, con los importes copiados y EDITABLES (se pueden sobreescribir uno por uno en el mismo pedido). Admite excluir prestaciones. Si
+}

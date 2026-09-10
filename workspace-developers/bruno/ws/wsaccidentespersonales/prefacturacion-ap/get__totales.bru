@@ -1,0 +1,23 @@
+meta {
+  name: Totales del filtro completo
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/ap/prefacturacion/lineas/totales
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: totales
+  description: Subtotal sin IVA, IVA y total del filtro entero (no de la pagina), mas los contadores de las 5 solapas y cuantas lineas quedaron sin precio, que es lo que explica por que el total 'no cierra'.
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Guarda la observacion de un item
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/items/{idLinea}/observacion
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: observarItem
+  description: Guarda un texto y nada mas. NO cambia el importe: un valor mal cargado no se corrige en la prefactura.
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Anular la vigencia de un contrato
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/ap/contratos-venta/{idContratoVenta}
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: anular_1
+  description: Marca la fila de contrato como ANULADA (cargada por error). Exige motivo: anular un contrato cambia si el cliente se puede valorizar, asi que una anulacion sin explicacion deja un cliente apagado sin 
+}

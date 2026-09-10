@@ -1,0 +1,23 @@
+meta {
+  name: Anular un valor de venta
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{baseUrl}}/ap/valores-venta/{idValorVenta}
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: anular
+  description: Marca la fila como ANULADA: cargada por error, nunca se aplico. NO es una baja de vigencia (esa es la version nueva) y NO reabre la version anterior. Consecuencia asumida y visible: si se anula la ver
+}

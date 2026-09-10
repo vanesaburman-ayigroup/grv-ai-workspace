@@ -1,0 +1,23 @@
+meta {
+  name: Bitacora de cambios de la prefactura
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/ap/prefacturacion/prefacturas/{idPrefactura}/movimientos
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: movimientos
+  description: Tres causas y no hay cuarta: CAMBIO_DE_VALOR, CANCELACION, ALTA_TARDIA. MUESTRA el movimiento; no ofrece editar el importe. Un valor mal cargado se corrige UNA VEZ en la pantalla de contratos y baja s
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Ultimo precio conocido de un medicamento
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/ap/valores-manuales/ultimo-precio
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: ultimoPrecio
+  description: Devuelve el precio con el que se cargo por ULTIMA VEZ ese medicamento, con su fuente y la fecha en que se consulto. Existe porque el portal externo de precios NO conserva historial: este sistema es el
+}

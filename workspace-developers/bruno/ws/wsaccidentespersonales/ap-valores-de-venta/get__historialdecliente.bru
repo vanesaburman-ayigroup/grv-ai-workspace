@@ -1,0 +1,23 @@
+meta {
+  name: Historial de cambios de la grilla de un cliente
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/ap/valores-venta/historial
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: historialDeCliente
+  description: Que cambio en la grilla de un cliente y POR QUE: importe anterior, importe nuevo, porcentaje cuando fue un aumento masivo, si en ese paso se redondeo, el motivo y quien lo hizo. Sin esto un salto de 1
+}

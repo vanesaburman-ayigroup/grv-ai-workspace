@@ -1,0 +1,36 @@
+meta {
+  name: Agrega un item manual a la prefactura
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/items/manual
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "idPrefactura": 5,
+    "idDenuncia": 123456,
+    "descripcion": "Material de osteosintesis",
+    "cantidad": 1,
+    "costo": 180000.0,
+    "fechaRealizacion": "2026-07-18",
+    "motivo": "No estaba cargado en la base"
+  }
+}
+
+docs {
+  operationId: agregarItemManual
+  description: Para lo que nunca va a matchear un codigo (material de osteosintesis, medicacion de la farmacia del sanatorio). Nace con origen MANUAL y estado PREFACTURADO.
+}

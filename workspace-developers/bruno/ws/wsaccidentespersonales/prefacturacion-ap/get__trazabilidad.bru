@@ -1,0 +1,23 @@
+meta {
+  name: De donde sale el precio de un item
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/ap/prefacturacion/items/{idLinea}/trazabilidad
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: trazabilidad
+  description: La version exacta de la grilla que se aplico, su vigencia y el historial de importes de esa combinacion. Cuando no hubo precio, el motivo: los cuatro se arreglan en lugares distintos.
+}

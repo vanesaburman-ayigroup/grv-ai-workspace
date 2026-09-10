@@ -1,0 +1,23 @@
+meta {
+  name: Registrar un valor manual de consumo
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/ap/valores-manuales
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: crear_1
+  description: Carga un monto manual que entra al consumo del siniestro. En MEDICACION el monto NO se manda: lo calcula el backend como cantidad x precioUnitario, y son obligatorios cantidad, precioUnitario, fuenteP
+}

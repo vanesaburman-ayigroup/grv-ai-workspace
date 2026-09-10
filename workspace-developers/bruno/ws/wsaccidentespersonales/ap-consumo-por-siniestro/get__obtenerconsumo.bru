@@ -1,0 +1,23 @@
+meta {
+  name: Consumo y semaforo de un siniestro AP
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/ap/siniestros/{idDenuncia}/consumo
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: obtenerConsumo
+  description: Devuelve el consumo del siniestro separado en facturado, devengado y estimado, la proyeccion, los dos porcentajes y el nivel del semaforo. Es una consulta: no registra avisos ni modifica nada. Requier
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Habilitacion del cierre por facturado de un siniestro AP
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/ap/siniestros/{idDenuncia}/habilitacion-cierre
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: habilitacionCierre
+  description: Responde si el FACTURADO del siniestro alcanza o supera el tope del asegurado, que es la unica condicion con la que el cierre por consumo se habilita. NUNCA se habilita por proyeccion: la proyeccion i
+}

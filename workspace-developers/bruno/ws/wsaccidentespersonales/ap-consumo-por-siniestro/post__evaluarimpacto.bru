@@ -1,0 +1,23 @@
+meta {
+  name: Evaluar el impacto de una autorizacion
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ap/siniestros/{idDenuncia}/impacto
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: evaluarImpacto
+  description: Responde si un monto entra en el tope del siniestro: devuelve el consumo resultante, el saldo que quedaria y el nivel antes y despues. Es POST porque el monto a evaluar viaja en el body, pero no persi
+}

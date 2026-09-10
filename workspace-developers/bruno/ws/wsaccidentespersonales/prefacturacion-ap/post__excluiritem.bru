@@ -1,0 +1,30 @@
+meta {
+  name: Excluye un item de la prefactura
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/ap/prefacturacion/items/{idLinea}/excluir
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "motivo": "YA_PREFACTURADO_MES_ANTERIOR"
+  }
+}
+
+docs {
+  operationId: excluirItem
+  description: No borra: pone EXCLUIDO y guarda motivo, usuario y fecha. Es reversible. El motivo OTRO exige detalle no vacio.
+}

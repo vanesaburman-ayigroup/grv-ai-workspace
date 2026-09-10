@@ -1,0 +1,23 @@
+meta {
+  name: Lineas prefacturables del cliente y el periodo
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{baseUrl}}/ap/prefacturacion/lineas
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  operationId: buscar_4
+  description: Detalle linea por linea, a valor de venta SIN IVA. Una linea sin precio en la grilla viaja con valorUnitarioVenta y totalVenta en null y sinPrecio en true, NUNCA en 0, y queda fuera del total: un cero
+}
