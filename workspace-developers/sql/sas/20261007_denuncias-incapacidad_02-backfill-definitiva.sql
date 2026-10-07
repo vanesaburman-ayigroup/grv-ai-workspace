@@ -1,5 +1,5 @@
 -- ============================================
--- Script: 20261007_denuncias-incapacidad_02-backfill-definitiva.sql
+-- Script: backfill de la incapacidad DEFINITIVA en cs.denuncias_incapacidad
 -- Descripcion: carga en cs.denuncias_incapacidad la incapacidad DEFINITIVA historica
 --              de las denuncias ya cerradas, tomandola del cierre vigente de cada
 --              denuncia en cs.cierres_denuncias_log.
@@ -8,32 +8,76 @@
 --
 -- Verificar antes de aplicar (solo lectura):
 --   SELECT VERSION();
---   SELECT @@sql_mode, @@binlog_format, @@transaction_isolation, @@lock_wait_timeout;
+--   SELECT @@sql_mode, @@binlog_format, @@tx_isolation, @@lock_wait_timeout;
+--                        -- En MariaDB 10.x la variable es @@tx_isolation; @@transaction_isolation
+--                        -- (error 1193 si no existe) recien se llama asi desde MariaDB 11.1+.
+--                        -- Verificar la version con SELECT VERSION() y usar la que corresponda.
+--   @@sql_mode: si incluye NO_ZERO_DATE / NO_ZERO_IN_DATE (con modo estricto), un
+--                        -- fecha_carga_alta '0000-00-00' en el log hace fallar el INSERT.
+--                        -- Contar: SELECT COUNT(*) FROM cs.cierres_denuncias_log
+--                        --         WHERE fecha_carga_alta = '0000-00-00';
+--   @@binlog_format: si es STATEMENT, el bloque B (READ COMMITTED) FALLA con error 1665.
+--                        -- No aplicarlo asi: usar MIXED/ROW (lo decide DBA) o la alternativa
+--                        -- de auto-commit de "Como correrlo" (sin SET SESSION ... READ COMMITTED).
+--   id_responsable inexistente o 0: id_persona no tiene FK, asi que se copia tal cual.
+--                        -- SELECT COUNT(*) FROM cs.cierres_denuncias_log l
+--                        --  LEFT JOIN cs.personas p ON p.id_persona = l.id_responsable
+--                        --  WHERE l.id_responsable IS NOT NULL
+--                        --    AND (l.id_responsable = 0 OR p.id_persona IS NULL);
+--   Indice: SHOW INDEX FROM cs.cierres_denuncias_log; debe haber uno por
+--                        -- (id_denuncia, id_cierre_denuncia_log). Sin el, el MAX por denuncia
+--                        -- es un full scan agrupado. Correr EXPLAIN del SELECT interno de A7
+--                        -- (el derivado con MAX ... GROUP BY) y revisar que use ese indice.
 --   SELECT @@hostname;   -- el MCP del entorno lee PROD; el script se corre en el
 --                        -- primario del ambiente correcto, confirmar donde estas conectada.
 --   SHOW CREATE TABLE cs.denuncias;
 --   SHOW CREATE TABLE cs.cierres_denuncias_log;
---   DESCRIBE cs.estados_medicos;   -- confirmar que existe es_cierre (lo usa A9)
+--   DESCRIBE cs.estados_medicos;   -- solo si se va a correr A9 (OPCIONAL): confirmar
+--                        -- es_cierre y denuncias.id_estado_medico (DESCRIBE cs.denuncias)
 --   SELECT COUNT(*) FROM cs.cierres_denuncias_log;   -- si es muy grande, partir el
 --                        -- INSERT por rangos de id_denuncia (ver bloque B)
---   Recomendado: correr A1 a A9 (solo lectura) en prod antes de aplicar y revisar los numeros.
+--   Recomendado: correr A1 a A8 (y A9 si corresponde; solo lectura) en prod antes de aplicar y revisar los numeros.
 --
 -- Orden de uso:
---   1. Crear la tabla con 20261007_denuncias-incapacidad_01-tabla.sql.
+--   1. Crear la tabla con el script de la tabla cs.denuncias_incapacidad.
 --   2. Correr el bloque A (verificacion previa, solo lectura) y revisar los numeros.
---   3. Correr el bloque B completo como UNA tanda, sin pausa (ver "Como correrlo").
+--   3. Correr el bloque B como UNA tanda, sin pausa (ver "Como correrlo", procedimiento 1 o 2).
 --   4. Correr el bloque C (verificacion posterior, solo lectura).
 --   Es indistinto correrlo antes o despues del deploy de los ws que escriben la tabla:
 --   no pisa filas existentes (ver bloque B).
 --
--- Como correrlo (DBeaver):
---   * NO ejecutar el archivo entero con Alt+X: la transaccion del bloque B quedaria
---     abierta (sin COMMIT ni ROLLBACK) hasta cerrar la sesion y mantendria locks.
---   * NO ejecutar el INSERT suelto: en auto-commit se confirma sin vuelta atras.
---   * Seleccionar el bloque B completo (desde SET SESSION hasta el ultimo SELECT de
---     control) y ejecutarlo como script (Alt+X sobre la seleccion). Revisar los
---     resultados; despues seleccionar y ejecutar SOLO la linea COMMIT o SOLO la
---     linea ROLLBACK (descomentandola).
+-- Como correrlo (DBeaver). Dos procedimientos escritos; la persona elige uno.
+--
+--   Antes de empezar (ambos):
+--     SELECT @@autocommit, @@in_transaction;   -- @@in_transaction debe dar 0
+--     SELECT trx_id, trx_state, trx_started, trx_mysql_thread_id
+--       FROM INFORMATION_SCHEMA.INNODB_TRX;    -- no debe haber transacciones abiertas
+--                                              -- (propias ni de otras sesiones/servicios)
+--
+--   Procedimiento 1 - transaccion con COMMIT/ROLLBACK (requiere binlog_format MIXED o ROW):
+--     * NO usar Alt+X sobre el archivo entero: la transaccion del bloque B quedaria
+--       abierta (sin COMMIT ni ROLLBACK) hasta cerrar la sesion y mantendria locks.
+--     * NO ejecutar el INSERT suelto: en auto-commit se confirma sin vuelta atras.
+--     * Seleccionar SOLO el bloque B (desde SET SESSION hasta el ultimo SELECT de
+--       control) y ejecutarlo como script (Alt+X sobre la seleccion).
+--     * Si el INSERT falla, DBeaver pregunta que hacer: elegir "Stop" (NUNCA "Skip":
+--       seguiria con los controles y la transaccion quedaria abierta). Tras un error,
+--       ejecutar ROLLBACK.
+--     * Revisar los resultados y ejecutar DE INMEDIATO, seleccionando SOLO esa linea,
+--       COMMIT o ROLLBACK (descomentandola). No cerrar el editor ni la conexion con
+--       la transaccion abierta.
+--     * Carrera con los servicios: si un ws inserta la misma (id_denuncia,'DEFINITIVA')
+--       mientras corre el INSERT, el statement completo falla con 1062 (duplicate key).
+--       Hacer ROLLBACK y repetir (la segunda corrida ya ve esa fila por el NOT EXISTS).
+--
+--   Procedimiento 2 (ALTERNATIVA mas segura) - una vez en auto-commit, sin transaccion abierta:
+--     * Como el INSERT es idempotente y se revierte con el DELETE de "Como revertir",
+--       puede correrse UNA vez en auto-commit: ejecutar solo el INSERT y el SELECT
+--       ROW_COUNT() siguiente (en el mismo script), SIN SET SESSION ... READ COMMITTED
+--       ni START TRANSACTION. No deja nada abierto si algo sale mal.
+--     * Despues correr los controles C (C1 a C4) y comparar filas_insertadas con A7.
+--     * Si fallan los controles C: revertir con el DELETE (con copia previa, ver abajo).
+--     * Misma carrera del 1062: el INSERT falla entero y no deja filas; repetir.
 --
 -- Idempotente: se puede correr N veces. Solo inserta las denuncias que todavia no
 -- tienen fila (id_denuncia, 'DEFINITIVA'); una segunda corrida inserta 0 filas.
@@ -170,9 +214,9 @@ FROM cs.denuncias_incapacidad
 WHERE tipo = 'DEFINITIVA'
 GROUP BY origen;
 
--- A9. Denuncias reabiertas: cierre vigente con incapacidad pero estado medico actual que no es de cierre.
---     Hoy se insertan igual (es el ultimo dato definitivo conocido). VERIFICAR con DESCRIBE
---     cs.estados_medicos que existe la columna es_cierre antes de correr esta consulta.
+-- A9. OPCIONAL: correr solo si DESCRIBE confirma estados_medicos.es_cierre y denuncias.id_estado_medico.
+--     Denuncias reabiertas: cierre vigente con incapacidad pero estado medico actual que no es de cierre.
+--     Hoy se insertan igual (es el ultimo dato definitivo conocido).
 SELECT COUNT(*) AS reabiertas_con_cierre_previo_con_incapacidad
 FROM cs.cierres_denuncias_log v
 JOIN (
@@ -196,15 +240,19 @@ WHERE v.id_incapacidad IS NOT NULL
 -- Si el volumen es grande y hay riesgo de lock wait, correr por tramos agregando
 -- "AND v.id_denuncia BETWEEN <desde> AND <hasta>" al WHERE del SELECT interno.
 --
--- Seleccionar desde "SET SESSION" hasta el ultimo SELECT de control y ejecutar como
--- script. Despues decidir: seleccionar y ejecutar SOLO COMMIT o SOLO ROLLBACK.
+-- Seleccionar SOLO este bloque, desde "SET SESSION" hasta el ultimo SELECT de control, y
+-- ejecutar como script con "Stop" ante errores (nunca "Skip"). Despues decidir:
+-- seleccionar y ejecutar SOLO COMMIT o SOLO ROLLBACK.
+-- ADVERTENCIA: READ COMMITTED con @@binlog_format = STATEMENT falla (error 1665).
+-- Si el binlog_format es STATEMENT NO aplicar este bloque asi: pedir MIXED/ROW o usar
+-- el procedimiento 2 (auto-commit, sin SET SESSION ... READ COMMITTED).
 -- ============================================
 
 SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
 
 -- Control: @@autocommit puede ser 1 (START TRANSACTION lo suspende hasta COMMIT/ROLLBACK);
 -- @@in_transaction debe ser 0 antes de empezar (si da 1 hay una transaccion abierta previa).
-SELECT @@autocommit AS autocommit, @@in_transaction AS in_transaction_antes, @@transaction_isolation AS aislamiento;
+SELECT @@autocommit AS autocommit, @@in_transaction AS in_transaction_antes, @@tx_isolation AS aislamiento;
 
 START TRANSACTION;
 
@@ -350,8 +398,18 @@ LIMIT 10;
 -- Como revertir (solo lo que cargo este script):
 --   Revisar primero la cantidad:
 --     SELECT COUNT(*) FROM cs.denuncias_incapacidad WHERE tipo = 'DEFINITIVA' AND origen = 'MIGRACION';
---   Borrar:
+--   Guardar una copia antes de borrar:
+--     CREATE TABLE cs.denuncias_incapacidad_migracion_bkp_20261007 AS
+--       SELECT * FROM cs.denuncias_incapacidad WHERE tipo = 'DEFINITIVA' AND origen = 'MIGRACION';
+--     SELECT COUNT(*) FROM cs.denuncias_incapacidad_migracion_bkp_20261007;  -- igual a la cantidad de arriba
+--   Borrar, en transaccion (verificar ROW_COUNT() y recien ahi COMMIT; si no, ROLLBACK):
+--     START TRANSACTION;
 --     DELETE FROM cs.denuncias_incapacidad WHERE tipo = 'DEFINITIVA' AND origen = 'MIGRACION';
+--     SELECT ROW_COUNT();
+--     -- COMMIT;  o  -- ROLLBACK;
+--   ADVERTENCIA: si un servicio edito una fila origen MIGRACION manteniendo el origen, el
+--   DELETE borraria sus datos. Revisar antes cuales tienen fecha_modificacion > fecha_carga
+--   y excluirlas del DELETE.
 --   NO borrar filas con otro origen ('MANUAL' o 'CIERRE'): son las que escriben los ws.
 --   Si un ws edita una fila origen MIGRACION, puede quedar con otro origen o mantenerlo segun
 --   su implementacion; confirmar con el SELECT de arriba antes de borrar.

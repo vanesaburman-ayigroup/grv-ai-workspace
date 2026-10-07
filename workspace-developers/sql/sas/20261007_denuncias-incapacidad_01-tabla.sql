@@ -1,5 +1,5 @@
 -- ============================================
--- Script: 20261007_denuncias-incapacidad_01-tabla.sql
+-- Script: tabla cs.denuncias_incapacidad
 -- Descripcion: crea cs.denuncias_incapacidad, donde se guarda la incapacidad
 --              DEFINITIVA y la PRESUNTA de cada denuncia fuera de cs.denuncias.
 --              Una fila por (denuncia, tipo). La presunta queda como respaldo.
@@ -19,25 +19,38 @@
 --   3. SELECT VERSION();
 --      Los CHECK solo se aplican desde MariaDB 10.2.1; en versiones anteriores
 --      se aceptan y se ignoran sin error, y la tabla quedaria sin validacion.
---   4. SHOW TABLES LIKE 'denuncias_incapacidad';
---      Si ya existe, IF NOT EXISTS no hace nada y oculta una tabla preexistente
---      distinta: comparar con SHOW CREATE TABLE cs.denuncias_incapacidad.
+--   4. SHOW TABLES LIKE 'denuncias_incapacidad';   (paso OBLIGATORIO)
+--      Debe dar vacio. El CREATE TABLE no lleva IF NOT EXISTS a proposito: si la
+--      tabla ya existe falla con error 1050 y no se debe seguir; comparar con
+--      SHOW CREATE TABLE cs.denuncias_incapacidad antes de decidir.
 --   5. Que no existan triggers ni vistas que dependan de esta tabla.
---   6. @@hostname: correrlo en el primario del ambiente correcto.
+--   6. SELECT @@hostname, @@tx_isolation;
+--      Correrlo en el primario del ambiente correcto. En MariaDB 10.x la variable
+--      es @@tx_isolation (@@transaction_isolation recien existe desde MariaDB 11.1).
 --
 -- Orden de despliegue:
 --   La tabla va ANTES que los jar de wsdocumento, wsauditoria y wstramitador,
 --   porque esos ws leen y escriben en ella al arrancar el flujo.
---   Despues, opcionalmente, el backfill 20261007_denuncias-incapacidad_02-backfill-definitiva.sql.
+--   Despues, opcionalmente, el script de backfill de la incapacidad DEFINITIVA.
+--
+-- Verificar despues de crear la tabla (solo lectura):
+--   SHOW CREATE TABLE cs.denuncias_incapacidad;
+--   Debe mostrar los 3 CHECK (tipo, origen, porcentaje), el UNIQUE
+--   uk_denuncias_incapacidad_denuncia_tipo, ENGINE=InnoDB y CHARSET=utf8mb4.
 --
 -- Como revertir:
---   DROP TABLE cs.denuncias_incapacidad;
---   Solo si no hay datos que conservar: antes revisar
---   SELECT tipo, origen, COUNT(*) FROM cs.denuncias_incapacidad GROUP BY tipo, origen;
---   y dar de baja los jar que la usan, o van a fallar.
+--   1. Bajar primero los jar de wsdocumento, wsauditoria y wstramitador (o confirmar
+--      que ningun servicio usa la tabla); si no, van a fallar.
+--   2. Revisar si hay datos:
+--      SELECT tipo, origen, COUNT(*) FROM cs.denuncias_incapacidad GROUP BY tipo, origen;
+--   3. Si hay datos, guardar antes una copia (el nombre de la copia lleva la fecha):
+--      CREATE TABLE cs.denuncias_incapacidad_bkp_20261007 AS
+--        SELECT * FROM cs.denuncias_incapacidad;
+--      SELECT COUNT(*) FROM cs.denuncias_incapacidad_bkp_20261007;  -- debe igualar el original
+--   4. DROP TABLE IF EXISTS cs.denuncias_incapacidad;
 -- ============================================
 
-CREATE TABLE IF NOT EXISTS cs.denuncias_incapacidad (
+CREATE TABLE cs.denuncias_incapacidad (
     id_denuncia_incapacidad BIGINT NOT NULL AUTO_INCREMENT,
     id_denuncia             DECIMAL(22,0) NOT NULL,
     tipo                    VARCHAR(12) NOT NULL,
