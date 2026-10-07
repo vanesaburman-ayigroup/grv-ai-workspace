@@ -7,12 +7,18 @@
 -- Charset: cs.cd_cartas es latin1 (la tilde se guarda en 1 byte, p.ej. o con tilde = F3). Conectar con un
 --   cliente utf8/utf8mb4 (conversion automatica); la verificacion final muestra HEX y detecta '?' (perdida de caracteres).
 -- Las cartas ambiguas (ver 03-lote.md) estan COMENTADAS despues de los inserts.
+--
+-- MARCAS PARA REVISAR ANTES DE EJECUTAR (buscar '>>>'):
+--   >>> MORTALES      : modulo NUEVO (no existe hoy) + 8 cartas. Confirmar con Agustin Mesplet que es un modulo y no una carta.
+--   >>> CARTA NUEVA   : 'Alta por telemedicina. Adecuada a Res. 20-2026.' se inserta aunque ya existe 'Alta por telemedicina' (id 19).
+--   >>> YA EXISTEN (x5) : PMI, Deslinde serologico, Pluriempleo, No concurrir a citacion, Trayecto IN ITINERE: no se insertan;
+--                       la ubicacion de cada una esta en un comentario mas abajo (PMI = misma carta que GLPI 2632, RECHAZOS 18).
 
 SELECT @@hostname AS host, DATABASE() AS bd;
 
 START TRANSACTION;
 
--- 1) Modulo nuevo MORTALES (cd_modulos tiene UK por nombre)
+-- 1) >>> MORTALES: MODULO NUEVO. Se crea aca (cd_modulos tiene UK por nombre). Confirmar que no es una carta de otro modulo.
 INSERT INTO cs.cd_modulos (nombre, activo)
 SELECT 'MODULO MORTALES', 1 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM cs.cd_modulos WHERE nombre = 'MODULO MORTALES');
@@ -25,6 +31,7 @@ WHERE m.nombre = 'MODULO ABANDONO'
   AND NOT EXISTS (SELECT 1 FROM cs.cd_cartas c WHERE c.id_modulo = m.id_modulo AND (c.numero_carta = 10 OR c.descripcion = 'Citación a Turno Médico con prórroga'));
 
 -- MODULO ALTAS
+-- >>> CARTA NUEVA: ya existe 'Alta por telemedicina' (id 19). Esta es la version adecuada a la Res. 20-2026; confirmar que va como carta nueva y no como renombre de la 19.
 INSERT INTO cs.cd_cartas (id_modulo, numero_carta, descripcion, activo)
 SELECT m.id_modulo, 5, 'Alta por telemedicina. Adecuada a Res. 20-2026.', 1
 FROM cs.cd_modulos m
@@ -55,7 +62,7 @@ FROM cs.cd_modulos m
 WHERE m.nombre = 'MODULO ALTAS'
   AND NOT EXISTS (SELECT 1 FROM cs.cd_cartas c WHERE c.id_modulo = m.id_modulo AND (c.numero_carta = 9 OR c.descripcion = 'Rectificación Alta con incapacidad a sin incapacidad.'));
 
--- MODULO MORTALES
+-- >>> MODULO MORTALES (NUEVO): 8 cartas, numeros 1 a 8. La 1 reemplaza a la id 34 de OTRAS CITACIONES (baja logica mas abajo).
 INSERT INTO cs.cd_cartas (id_modulo, numero_carta, descripcion, activo)
 SELECT m.id_modulo, 1, 'Suspensión plazos 298 Derechohabientes. Pedido de documentación', 1
 FROM cs.cd_modulos m
@@ -129,46 +136,18 @@ FROM cs.cd_modulos m
 WHERE m.nombre = 'MODULO RECHAZOS'
   AND NOT EXISTS (SELECT 1 FROM cs.cd_cartas c WHERE c.id_modulo = m.id_modulo AND (c.numero_carta = 22 OR c.descripcion = 'Reversión de rechazo. Caso con alta.'));
 
--- AMBIGUAS: NO se ejecutan hasta confirmar (descomentar solo las confirmadas)
--- MODULO OTRAS CITACIONES 8: Deslinde de responsabilidad por abandono en caso de serológico
---   Motivo: ya existe en ABANDONO: id 64 numero 9 'Se notifica deslinde de Responsabilidad por inasistencia. Casos Serológicos...' (18 solicitudes). El pedido lo ubica en OTRAS CITACIONES con otro nombre.
--- INSERT INTO cs.cd_cartas (id_modulo, numero_carta, descripcion, activo)
--- SELECT m.id_modulo, 8, 'Deslinde de responsabilidad por abandono en caso de serológico', 1
--- FROM cs.cd_modulos m
--- WHERE m.nombre = 'MODULO OTRAS CITACIONES'
---   AND NOT EXISTS (SELECT 1 FROM cs.cd_cartas c WHERE c.id_modulo = m.id_modulo AND (c.numero_carta = 8 OR c.descripcion = 'Deslinde de responsabilidad por abandono en caso de serológico'));
-
--- MODULO RECHAZOS 23: Rechazo PMI anterior a vigencia de Autoseguro
---   Motivo: GLPI 2632 ya propone 'EP FECHA PMI ANTERIOR VIGENCIA' (RECHAZOS 18, sin ejecutar). Confirmar si es la misma carta; si lo es, renombrar en 2632 y no insertar esta.
--- INSERT INTO cs.cd_cartas (id_modulo, numero_carta, descripcion, activo)
--- SELECT m.id_modulo, 23, 'Rechazo PMI anterior a vigencia de Autoseguro', 1
--- FROM cs.cd_modulos m
--- WHERE m.nombre = 'MODULO RECHAZOS'
---   AND NOT EXISTS (SELECT 1 FROM cs.cd_cartas c WHERE c.id_modulo = m.id_modulo AND (c.numero_carta = 23 OR c.descripcion = 'Rechazo PMI anterior a vigencia de Autoseguro'));
-
--- MODULO RECHAZOS 24: Rechazo pluriempleo. Lugar de destino de otra A.R.T.
---   Motivo: existe id 50 numero 16 'RECHAZO PLURIEMPLEO' (3 solicitudes). Confirmar si es carta nueva o renombre.
--- INSERT INTO cs.cd_cartas (id_modulo, numero_carta, descripcion, activo)
--- SELECT m.id_modulo, 24, 'Rechazo pluriempleo. Lugar de destino de otra A.R.T.', 1
--- FROM cs.cd_modulos m
--- WHERE m.nombre = 'MODULO RECHAZOS'
---   AND NOT EXISTS (SELECT 1 FROM cs.cd_cartas c WHERE c.id_modulo = m.id_modulo AND (c.numero_carta = 24 OR c.descripcion = 'Rechazo pluriempleo. Lugar de destino de otra A.R.T.'));
-
--- MODULO RECHAZOS 25: Rechazo por no concurrir a citación
---   Motivo: parecida a id 39 numero 5 'Rechazo Inasistencia Citación médica con conocimiento de fecha de notif. Fehaciente'. Confirmar si es nueva.
--- INSERT INTO cs.cd_cartas (id_modulo, numero_carta, descripcion, activo)
--- SELECT m.id_modulo, 25, 'Rechazo por no concurrir a citación', 1
--- FROM cs.cd_modulos m
--- WHERE m.nombre = 'MODULO RECHAZOS'
---   AND NOT EXISTS (SELECT 1 FROM cs.cd_cartas c WHERE c.id_modulo = m.id_modulo AND (c.numero_carta = 25 OR c.descripcion = 'Rechazo por no concurrir a citación'));
-
--- MODULO RECHAZOS 26: Rechazo por alteración del trayecto IN ITINERE
---   Motivo: parecida a id 38 numero 4 'Rechazo evaluación médica + altera In itinere' (1 solicitud). Confirmar si es nueva.
--- INSERT INTO cs.cd_cartas (id_modulo, numero_carta, descripcion, activo)
--- SELECT m.id_modulo, 26, 'Rechazo por alteración del trayecto IN ITINERE', 1
--- FROM cs.cd_modulos m
--- WHERE m.nombre = 'MODULO RECHAZOS'
---   AND NOT EXISTS (SELECT 1 FROM cs.cd_cartas c WHERE c.id_modulo = m.id_modulo AND (c.numero_carta = 26 OR c.descripcion = 'Rechazo por alteración del trayecto IN ITINERE'));
+-- >>> YA EXISTEN (no se insertan): cartas del pedido que se encuentran en el sistema con otro nombre.
+--    El usuario las encuentra en estos modulos (se le informa en la respuesta del ticket):
+--    - 'Deslinde de responsabilidad por abandono en caso de serologico'
+--        -> MODULO ABANDONO, carta 9: 'Se notifica deslinde de Responsabilidad por inasistencia. Casos Serologicos...'
+--    - 'Rechazo pluriempleo. Lugar de destino de otra A.R.T.'
+--        -> MODULO RECHAZOS, carta 16: 'RECHAZO PLURIEMPLEO'
+--    - 'Rechazo por no concurrir a citacion'
+--        -> MODULO RECHAZOS, carta 5: 'Rechazo Inasistencia Citacion medica con conocimiento de fecha de notif. Fehaciente'
+--    - 'Rechazo por alteracion del trayecto IN ITINERE'
+--        -> MODULO RECHAZOS, carta 4: 'Rechazo evaluacion medica + altera In itinere'
+--    - 'Rechazo PMI anterior a vigencia de Autoseguro'
+--        -> MODULO RECHAZOS, carta 18: 'EP FECHA PMI ANTERIOR VIGENCIA' (misma carta, definido por Vane; cargada por GLPI 2632)
 
 -- 2) Bajas logicas pedidas ('se debe borrar'). NO se borra fisico: hay solicitudes que las referencian
 --    (id 34 con 9 solicitudes, id 48 con 73). Con activo = 0 dejan de ofrecerse y el historico sigue mostrando la carta.

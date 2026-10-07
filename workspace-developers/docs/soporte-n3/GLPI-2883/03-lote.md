@@ -37,14 +37,14 @@ En OTRAS CITACIONES el 7 queda para "Respuesta a Telegrama" (ya acordada en GLPI
 | RECHAZOS 14 "Rechazo por accidente no laboral (ej. En su domicilio)" (la reemplaza RECHAZOS 19) | 48 | 73 | `activo = 0` |
 Borrado fisico no corresponde: las solicitudes historicas apuntan por `id_cd_carta`.
 
-## Ambiguas / dudas (comentadas en 01-script.sql, no se insertan)
-| Carta pedida | Modulo | Duda |
-|---|---|---|
-| Rechazo PMI anterior a vigencia de Autoseguro | RECHAZOS | GLPI 2632 ya propone "EP FECHA PMI ANTERIOR VIGENCIA" (RECHAZOS 18, sin ejecutar). Si es la misma, renombrar en 2632 y no insertar esta; si son dos cartas, esta seria la 23. |
-| Deslinde de responsabilidad por abandono en caso de serológico | OTRAS CITACIONES | Ya existe en ABANDONO (id 64, nro 9): "Se notifica deslinde de Responsabilidad por inasistencia. Casos Serológicos..." (18 solicitudes). Confirmar si es otra carta o la misma mal ubicada. |
-| Rechazo pluriempleo. Lugar de destino de otra A.R.T. | RECHAZOS | Existe id 50, nro 16, "RECHAZO PLURIEMPLEO" (3 solicitudes). ¿Carta nueva o renombre? |
-| Rechazo por no concurrir a citación | RECHAZOS | Parecida a id 39, nro 5, "Rechazo Inasistencia Citación médica con conocimiento de fecha de notif. Fehaciente". |
-| Rechazo por alteración del trayecto IN ITINERE | RECHAZOS | Parecida a id 38, nro 4, "Rechazo evaluación médica + altera In itinere". |
+## Cartas pedidas que ya existen (no se insertan)
+| Carta pedida | Donde se encuentra |
+|---|---|
+| Rechazo PMI anterior a vigencia de Autoseguro | RECHAZOS 18 "EP FECHA PMI ANTERIOR VIGENCIA" (misma carta, definido por Vane; cargada por GLPI 2632) |
+| Deslinde de responsabilidad por abandono en caso de serológico | ABANDONO 9 "Se notifica deslinde de Responsabilidad por inasistencia. Casos Serológicos..." |
+| Rechazo pluriempleo. Lugar de destino de otra A.R.T. | RECHAZOS 16 "RECHAZO PLURIEMPLEO" |
+| Rechazo por no concurrir a citación | RECHAZOS 5 "Rechazo Inasistencia Citación médica con conocimiento de fecha de notif. Fehaciente" |
+| Rechazo por alteración del trayecto IN ITINERE | RECHAZOS 4 "Rechazo evaluación médica + altera In itinere" |
 
 Otras dudas menores (incluidas en el script):
 - "Alta por telemedicina. Adecuada a Res. 20-2026." convive con ALTAS 4 "Alta por telemedicina" (id 19, 1577 solicitudes): se inserta como carta nueva (nro 5), no como renombre. Confirmar.

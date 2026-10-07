@@ -54,7 +54,8 @@ def pre(t: str) -> str:
 
 def nota_2632() -> tuple[str, str]:
     m = "[DIAGNOSTICO N3 GLPI-2632]"
-    c = (p(m) + "<h3>Causa raíz</h3>"
+    c = (p("ESTADO: aplicado en PROD el 07/10/2026 (verificado: ids 68 y 69, módulos 7 y 8, números 7 y 18, sin pérdida de caracteres). Ticket resuelto.")
+         + p(m) + "<h3>Causa raíz</h3>"
          + p("Solicitud de CD (GCBA AUTOSEGURO, tipo 158): faltan 2 cartas en cs.cd_cartas. "
              "Módulo 7 (OTRAS CITACIONES) carta 7 'Respuesta a Telegrama' y módulo 8 (RECHAZOS) carta 18 "
              "'EP FECHA PMI ANTERIOR VIGENCIA'. Es solo falta de datos de catálogo; la carta 17 inactiva del módulo 8 no se toca ni se reutiliza.")
@@ -128,19 +129,27 @@ def nota_2883() -> tuple[str, str]:
              "RECHAZOS (8), nro 21: Reversión de rechazo. Caso sin alta. Citación.",
              "RECHAZOS (8), nro 22: Reversión de rechazo. Caso con alta.",
          ])
+         + "<h3>Resuelta</h3>"
+         + p("La carta de PMI quedó RESUELTA: 'Rechazo PMI anterior a vigencia de Autoseguro' es la misma que 'EP FECHA PMI ANTERIOR VIGENCIA' de GLPI 2632 (definido por la usuaria). "
+             "Va solo en 2632 (RECHAZOS 18) y no en este lote.")
          + "<h3>Cartas ambiguas y dudas abiertas (comentadas en el script, no se insertan)</h3>"
+         + p("Quedan 4 ambiguas; si se activan se numeran 8, 23, 24 y 25 respectivamente.")
          + ul([
-             "Rechazo PMI anterior a vigencia de Autoseguro (RECHAZOS): GLPI 2632 ya propone 'EP FECHA PMI ANTERIOR VIGENCIA' (RECHAZOS 18). Si es la misma, se renombra en 2632 y no se inserta; si son dos cartas, esta sería la 23.",
-             "Deslinde de responsabilidad por abandono en caso de serológico (OTRAS CITACIONES): ya existe en ABANDONO (id 64, nro 9, 18 solicitudes). Confirmar si es otra carta o la misma mal ubicada.",
-             "Rechazo pluriempleo. Lugar de destino de otra A.R.T. (RECHAZOS): existe id 50, nro 16, 'RECHAZO PLURIEMPLEO' (3 solicitudes). ¿Carta nueva o renombre?",
-             "Rechazo por no concurrir a citación (RECHAZOS): parecida a id 39, nro 5.",
-             "Rechazo por alteración del trayecto IN ITINERE (RECHAZOS): parecida a id 38, nro 4.",
-             "'Alta por telemedicina. Adecuada a Res. 20-2026.' convive con ALTAS 4 'Alta por telemedicina' (id 19, 1577 solicitudes): se inserta como carta nueva, no como renombre. Confirmar.",
+             "Deslinde serológico (OTRAS CITACIONES, nro 8): ya existe en ABANDONO (id 64, nro 9, 18 solicitudes). Confirmar si es otra carta o la misma mal ubicada.",
+             "Pluriempleo (RECHAZOS, nro 23): existe id 50, nro 16, 'RECHAZO PLURIEMPLEO' (3 solicitudes). ¿Carta nueva o renombre?",
+             "No concurrir a citación (RECHAZOS, nro 24): parecida a id 39, nro 5.",
+             "Trayecto IN ITINERE (RECHAZOS, nro 25): parecida a id 38, nro 4.",
+         ])
+         + "<h3>Marcas '>>>' del script a confirmar antes de ejecutar</h3>"
+         + ul([
+             ">>> MORTALES: módulo nuevo (no existe hoy) con 8 cartas. Confirmar con Agustín Mesplet que es un módulo y no una carta.",
+             ">>> CARTA NUEVA (telemedicina): 'Alta por telemedicina. Adecuada a Res. 20-2026.' se inserta como carta nueva (ALTAS 5) aunque ya existe 'Alta por telemedicina' (ALTAS 4, id 19, 1577 solicitudes). Confirmar que no es un renombre.",
              "'Suspensión plazos 298 Derechohabientes' se escribe sin el punto después de 298, como en el pedido (la carta vieja lo tenía).",
          ])
          + "<h3>Dependencia con GLPI 2632</h3>"
-         + p("Orden de aplicación: primero GLPI 2632, después este script en bajo y luego PROD. En OTRAS CITACIONES el número 7 queda reservado para 'Respuesta a Telegrama' (2632) y el 8 para la ambigua 'Deslinde'; "
-             "en RECHAZOS el 17 está inactiva (no se toca) y el 18 está reservado por 2632, de ahí se numera desde el 19. Verificación con HEX y chequeo de '?' (latin1) incluidos; el rollback chequea uso previo.")
+         + p("GLPI 2632 ya está aplicada en PROD (ids 68 y 69), por lo que la dependencia de numeración queda cumplida: OTRAS CITACIONES 7 'Respuesta a Telegrama' y RECHAZOS 18 'EP FECHA PMI ANTERIOR VIGENCIA' están ocupadas. "
+             "En RECHAZOS el 17 está inactiva (no se toca), de ahí se numera desde el 19. Orden: este script en bajo y luego PROD (aún pendiente, se aplica otro día). "
+             "Verificación con HEX y chequeo de '?' (latin1) incluidos; el rollback chequea uso previo.")
          + "<h3>01-script.sql</h3>" + pre(leer(2883, "01-script.sql"))
          + "<h3>02-rollback.sql</h3>" + pre(leer(2883, "02-rollback.sql")))
     return m, c
