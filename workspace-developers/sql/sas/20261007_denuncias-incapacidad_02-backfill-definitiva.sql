@@ -1,18 +1,39 @@
 -- ============================================
--- Script: 02-backfill-denuncias_incapacidad_definitiva.sql
+-- Script: 20261007_denuncias-incapacidad_02-backfill-definitiva.sql
 -- Descripcion: carga en cs.denuncias_incapacidad la incapacidad DEFINITIVA historica
 --              de las denuncias ya cerradas, tomandola del cierre vigente de cada
 --              denuncia en cs.cierres_denuncias_log.
 --
--- NO APLICADO. Lo ejecuta la usuaria a mano, bloque por bloque.
+-- Lo ejecuta una persona a mano, bloque por bloque (ver "Como correrlo").
+--
+-- Verificar antes de aplicar (solo lectura):
+--   SELECT VERSION();
+--   SELECT @@sql_mode, @@binlog_format, @@transaction_isolation, @@lock_wait_timeout;
+--   SELECT @@hostname;   -- el MCP del entorno lee PROD; el script se corre en el
+--                        -- primario del ambiente correcto, confirmar donde estas conectada.
+--   SHOW CREATE TABLE cs.denuncias;
+--   SHOW CREATE TABLE cs.cierres_denuncias_log;
+--   DESCRIBE cs.estados_medicos;   -- confirmar que existe es_cierre (lo usa A9)
+--   SELECT COUNT(*) FROM cs.cierres_denuncias_log;   -- si es muy grande, partir el
+--                        -- INSERT por rangos de id_denuncia (ver bloque B)
+--   Recomendado: correr A1 a A9 (solo lectura) en prod antes de aplicar y revisar los numeros.
 --
 -- Orden de uso:
---   1. Crear la tabla con 01-denuncias_incapacidad.sql.
+--   1. Crear la tabla con 20261007_denuncias-incapacidad_01-tabla.sql.
 --   2. Correr el bloque A (verificacion previa, solo lectura) y revisar los numeros.
---   3. Correr el bloque B (INSERT).
+--   3. Correr el bloque B completo como UNA tanda, sin pausa (ver "Como correrlo").
 --   4. Correr el bloque C (verificacion posterior, solo lectura).
 --   Es indistinto correrlo antes o despues del deploy de los ws que escriben la tabla:
 --   no pisa filas existentes (ver bloque B).
+--
+-- Como correrlo (DBeaver):
+--   * NO ejecutar el archivo entero con Alt+X: la transaccion del bloque B quedaria
+--     abierta (sin COMMIT ni ROLLBACK) hasta cerrar la sesion y mantendria locks.
+--   * NO ejecutar el INSERT suelto: en auto-commit se confirma sin vuelta atras.
+--   * Seleccionar el bloque B completo (desde SET SESSION hasta el ultimo SELECT de
+--     control) y ejecutarlo como script (Alt+X sobre la seleccion). Revisar los
+--     resultados; despues seleccionar y ejecutar SOLO la linea COMMIT o SOLO la
+--     linea ROLLBACK (descomentandola).
 --
 -- Idempotente: se puede correr N veces. Solo inserta las denuncias que todavia no
 -- tienen fila (id_denuncia, 'DEFINITIVA'); una segunda corrida inserta 0 filas.
@@ -25,16 +46,21 @@
 --   - Es el mismo criterio que usan los scripts de saneo existentes sobre esta tabla.
 --   Si el cierre vigente tiene id_incapacidad NULL (p. ej. cierre por muerte, donde el
 --   cierre limpia el dato) no se inserta nada y no se cae a un cierre anterior.
+--   Las filas del log con id_denuncia NULL se ignoran (ver A1b).
 --
 -- Mapeo:
 --   id_denuncia     = cierres_denuncias_log.id_denuncia
 --   tipo            = 'DEFINITIVA'
 --   con_incapacidad = (id_incapacidad = 1)
---   porcentaje      = porcentaje_incapacidad convertido a numero (0 a 100); NULL si no es
---                     convertible o si con_incapacidad = 0
+--   porcentaje      = NULL siempre. Decision D3: la columna porcentaje_incapacidad (en
+--                     denuncias y en el log) es compartida con la incapacidad presunta y
+--                     no se puede separar con certeza cual de las dos representa, asi que
+--                     no se migra. El porcentaje definitivo lo cargan los ws desde ahora.
 --   origen          = 'MIGRACION'
 --   id_persona      = cierres_denuncias_log.id_responsable
---   fecha_carga     = cierres_denuncias_log.fecha_carga_alta (o la hora actual si es NULL)
+--   fecha_carga y fecha_modificacion = cierres_denuncias_log.fecha_carga_alta, que es la
+--                     fecha de alta medica del cierre (aproximada, no la fecha real de la
+--                     carga), o la hora actual (NOW()) si es NULL.
 --
 -- Compatible con MariaDB 10.x: sin funciones de ventana, subconsulta con MAX.
 -- ============================================
@@ -49,28 +75,37 @@ SELECT COUNT(*) AS cierres_con_id_incapacidad
 FROM cs.cierres_denuncias_log
 WHERE id_incapacidad IS NOT NULL;
 
+-- A1b. Filas del log con id_denuncia NULL (no se migran).
+SELECT COUNT(*) AS filas_log_con_id_denuncia_null
+FROM cs.cierres_denuncias_log
+WHERE id_denuncia IS NULL;
+
 -- A2. Denuncias con mas de un cierre (el criterio "ultimo" importa en estas).
 SELECT COUNT(*) AS denuncias_con_mas_de_un_cierre
 FROM (
     SELECT id_denuncia
     FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
     GROUP BY id_denuncia
     HAVING COUNT(*) > 1
 ) m;
 
--- A3. De esas, en cuantas el dato de incapacidad cambia entre el cierre vigente y alguno anterior.
+-- A3. De esas, en cuantas el dato de incapacidad (id_incapacidad o texto del porcentaje)
+--     cambia entre el cierre vigente y alguno anterior.
 SELECT COUNT(DISTINCT v.id_denuncia) AS multiples_con_incapacidad_distinta
 FROM cs.cierres_denuncias_log v
 JOIN (
     SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
     FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
     GROUP BY id_denuncia
     HAVING COUNT(*) > 1
 ) u ON u.id_max = v.id_cierre_denuncia_log
 JOIN cs.cierres_denuncias_log o
   ON o.id_denuncia = v.id_denuncia
  AND o.id_cierre_denuncia_log < v.id_cierre_denuncia_log
- AND NOT (o.id_incapacidad <=> v.id_incapacidad);
+ AND NOT (o.id_incapacidad <=> v.id_incapacidad
+          AND o.porcentaje_incapacidad <=> v.porcentaje_incapacidad);
 
 -- A4. Cierres vigentes cuyo id_incapacidad no es 0 ni 1 (se tratan como sin incapacidad).
 SELECT v.id_incapacidad, COUNT(*) AS cantidad
@@ -78,68 +113,50 @@ FROM cs.cierres_denuncias_log v
 JOIN (
     SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
     FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
     GROUP BY id_denuncia
 ) u ON u.id_max = v.id_cierre_denuncia_log
 WHERE v.id_incapacidad IS NOT NULL
 GROUP BY v.id_incapacidad;
 
--- A5. Porcentajes no convertibles a numero entre 0 y 100, entre los cierres vigentes con incapacidad.
---     Se cuentan los que tienen texto (no NULL ni vacio) pero no pasan la conversion.
-SELECT COUNT(*) AS porcentajes_no_convertibles
-FROM (
-    SELECT REPLACE(REPLACE(REPLACE(TRIM(v.porcentaje_incapacidad), '%', ''), ' ', ''), ',', '.') AS pct
-    FROM cs.cierres_denuncias_log v
-    JOIN (
-        SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
-        FROM cs.cierres_denuncias_log
-        GROUP BY id_denuncia
-    ) u ON u.id_max = v.id_cierre_denuncia_log
-    WHERE v.id_incapacidad = 1
-      AND v.porcentaje_incapacidad IS NOT NULL
-      AND TRIM(v.porcentaje_incapacidad) <> ''
-) t
-WHERE NOT (t.pct REGEXP '^[0-9]{1,3}([.][0-9]{1,4})?$' AND CAST(t.pct AS DECIMAL(10,4)) <= 100);
-
--- A5b. Ejemplos de esos valores no convertibles (hasta 30 distintos).
-SELECT t.porcentaje_incapacidad, COUNT(*) AS cantidad
-FROM (
-    SELECT v.porcentaje_incapacidad,
-           REPLACE(REPLACE(REPLACE(TRIM(v.porcentaje_incapacidad), '%', ''), ' ', ''), ',', '.') AS pct
-    FROM cs.cierres_denuncias_log v
-    JOIN (
-        SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
-        FROM cs.cierres_denuncias_log
-        GROUP BY id_denuncia
-    ) u ON u.id_max = v.id_cierre_denuncia_log
-    WHERE v.id_incapacidad = 1
-      AND v.porcentaje_incapacidad IS NOT NULL
-      AND TRIM(v.porcentaje_incapacidad) <> ''
-) t
-WHERE NOT (t.pct REGEXP '^[0-9]{1,3}([.][0-9]{1,4})?$' AND CAST(t.pct AS DECIMAL(10,4)) <= 100)
-GROUP BY t.porcentaje_incapacidad
-ORDER BY cantidad DESC
-LIMIT 30;
-
--- A6. Cierres vigentes con incapacidad = 1 y sin porcentaje (quedan con_incapacidad = 1, porcentaje NULL).
-SELECT COUNT(*) AS con_incapacidad_sin_porcentaje
+-- A5. Informativo: cierres vigentes con incapacidad = 1 que tienen porcentaje cargado.
+--     El porcentaje NO se migra (decision D3): las filas MIGRACION quedan con porcentaje NULL.
+SELECT COUNT(*) AS vigentes_con_incapacidad_y_porcentaje
 FROM cs.cierres_denuncias_log v
 JOIN (
     SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
     FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
+    GROUP BY id_denuncia
+) u ON u.id_max = v.id_cierre_denuncia_log
+WHERE v.id_incapacidad = 1
+  AND v.porcentaje_incapacidad IS NOT NULL
+  AND TRIM(v.porcentaje_incapacidad) <> '';
+
+-- A6. Informativo: cierres vigentes con incapacidad = 1 y sin porcentaje.
+SELECT COUNT(*) AS vigentes_con_incapacidad_sin_porcentaje
+FROM cs.cierres_denuncias_log v
+JOIN (
+    SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
+    FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
     GROUP BY id_denuncia
 ) u ON u.id_max = v.id_cierre_denuncia_log
 WHERE v.id_incapacidad = 1
   AND (v.porcentaje_incapacidad IS NULL OR TRIM(v.porcentaje_incapacidad) = '');
 
 -- A7. Filas que insertaria el bloque B (cierre vigente con id_incapacidad no nulo y sin fila DEFINITIVA).
+--     Anotar este numero: se compara con ROW_COUNT() del bloque B.
 SELECT COUNT(*) AS filas_a_insertar
 FROM cs.cierres_denuncias_log v
 JOIN (
     SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
     FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
     GROUP BY id_denuncia
 ) u ON u.id_max = v.id_cierre_denuncia_log
-WHERE v.id_incapacidad IS NOT NULL
+WHERE v.id_denuncia IS NOT NULL
+  AND v.id_incapacidad IS NOT NULL
   AND NOT EXISTS (
         SELECT 1
         FROM cs.denuncias_incapacidad di
@@ -161,6 +178,7 @@ FROM cs.cierres_denuncias_log v
 JOIN (
     SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
     FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
     GROUP BY id_denuncia
 ) u ON u.id_max = v.id_cierre_denuncia_log
 JOIN cs.denuncias d ON d.id_denuncia = v.id_denuncia
@@ -170,13 +188,23 @@ WHERE v.id_incapacidad IS NOT NULL
 
 
 -- ============================================
--- BLOQUE B - INSERT (escribe)
+-- BLOQUE B - INSERT (escribe). UNA tanda, sin pausa humana.
 -- Una fila DEFINITIVA por denuncia, desde su cierre vigente (mayor id_cierre_denuncia_log),
--- solo si id_incapacidad no es NULL. No pisa filas existentes: el NOT EXISTS evita
--- tocar lo que ya escribieron los ws, y el UNIQUE (id_denuncia, tipo) lo respalda.
+-- solo si id_denuncia e id_incapacidad no son NULL. No pisa filas existentes: el NOT EXISTS
+-- evita tocar lo que ya escribieron los ws, y el UNIQUE (id_denuncia, tipo) lo respalda.
+-- El porcentaje no se migra (decision D3): queda NULL.
 -- Si el volumen es grande y hay riesgo de lock wait, correr por tramos agregando
--- "AND v.id_denuncia BETWEEN <desde> AND <hasta>" al WHERE.
+-- "AND v.id_denuncia BETWEEN <desde> AND <hasta>" al WHERE del SELECT interno.
+--
+-- Seleccionar desde "SET SESSION" hasta el ultimo SELECT de control y ejecutar como
+-- script. Despues decidir: seleccionar y ejecutar SOLO COMMIT o SOLO ROLLBACK.
 -- ============================================
+
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+-- Control: @@autocommit puede ser 1 (START TRANSACTION lo suspende hasta COMMIT/ROLLBACK);
+-- @@in_transaction debe ser 0 antes de empezar (si da 1 hay una transaccion abierta previa).
+SELECT @@autocommit AS autocommit, @@in_transaction AS in_transaction_antes, @@transaction_isolation AS aislamiento;
 
 START TRANSACTION;
 
@@ -185,13 +213,7 @@ INSERT INTO cs.denuncias_incapacidad
 SELECT x.id_denuncia,
        'DEFINITIVA',
        x.con_incapacidad,
-       CASE
-           WHEN x.con_incapacidad = 1
-            AND x.pct REGEXP '^[0-9]{1,3}([.][0-9]{1,4})?$'
-            AND CAST(x.pct AS DECIMAL(10,4)) <= 100
-           THEN CAST(x.pct AS DECIMAL(5,2))
-           ELSE NULL
-       END,
+       NULL,
        'MIGRACION',
        x.id_responsable,
        COALESCE(x.fecha_carga_alta, NOW()),
@@ -200,15 +222,16 @@ FROM (
     SELECT v.id_denuncia,
            v.id_responsable,
            v.fecha_carga_alta,
-           CASE WHEN v.id_incapacidad = 1 THEN 1 ELSE 0 END AS con_incapacidad,
-           REPLACE(REPLACE(REPLACE(TRIM(v.porcentaje_incapacidad), '%', ''), ' ', ''), ',', '.') AS pct
+           CASE WHEN v.id_incapacidad = 1 THEN 1 ELSE 0 END AS con_incapacidad
     FROM cs.cierres_denuncias_log v
     JOIN (
         SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
         FROM cs.cierres_denuncias_log
+        WHERE id_denuncia IS NOT NULL
         GROUP BY id_denuncia
     ) u ON u.id_max = v.id_cierre_denuncia_log
-    WHERE v.id_incapacidad IS NOT NULL
+    WHERE v.id_denuncia IS NOT NULL
+      AND v.id_incapacidad IS NOT NULL
       AND NOT EXISTS (
             SELECT 1
             FROM cs.denuncias_incapacidad di
@@ -217,7 +240,32 @@ FROM (
       )
 ) x;
 
--- Revisar las filas afectadas contra A7 antes de confirmar.
+-- Filas insertadas: debe ser igual a A7. Tiene que ir inmediatamente despues del INSERT.
+SELECT ROW_COUNT() AS filas_insertadas;
+
+-- Control dentro de la transaccion: pendientes debe dar 0; migradas_total >= filas_insertadas
+-- (suma las de corridas anteriores); con_porcentaje_debe_ser_0 debe dar 0 (decision D3).
+SELECT
+    (SELECT COUNT(*)
+       FROM cs.cierres_denuncias_log v
+       JOIN (SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
+               FROM cs.cierres_denuncias_log
+              WHERE id_denuncia IS NOT NULL
+              GROUP BY id_denuncia) u ON u.id_max = v.id_cierre_denuncia_log
+      WHERE v.id_denuncia IS NOT NULL
+        AND v.id_incapacidad IS NOT NULL
+        AND NOT EXISTS (SELECT 1 FROM cs.denuncias_incapacidad di
+                         WHERE di.id_denuncia = v.id_denuncia AND di.tipo = 'DEFINITIVA')
+    ) AS pendientes_debe_ser_0,
+    (SELECT COUNT(*) FROM cs.denuncias_incapacidad
+      WHERE tipo = 'DEFINITIVA' AND origen = 'MIGRACION') AS migradas_total,
+    (SELECT COUNT(*) FROM cs.denuncias_incapacidad
+      WHERE tipo = 'DEFINITIVA' AND origen = 'MIGRACION' AND porcentaje IS NOT NULL) AS con_porcentaje_debe_ser_0,
+    @@in_transaction AS in_transaction_debe_ser_1;
+
+-- Decision. Si filas_insertadas coincide con A7 y los controles dan lo esperado:
+-- seleccionar y ejecutar SOLO la linea COMMIT (descomentarla). Si algo no cierra:
+-- seleccionar y ejecutar SOLO la linea ROLLBACK. No dejar la transaccion abierta.
 -- COMMIT;
 -- ROLLBACK;
 
@@ -233,10 +281,9 @@ WHERE tipo = 'DEFINITIVA'
 GROUP BY origen, con_incapacidad
 ORDER BY origen, con_incapacidad;
 
--- C2. Control de porcentaje: con incapacidad con y sin porcentaje, y sin incapacidad con porcentaje (debe ser 0).
-SELECT SUM(con_incapacidad = 1 AND porcentaje IS NOT NULL) AS con_incapacidad_con_porcentaje,
-       SUM(con_incapacidad = 1 AND porcentaje IS NULL)     AS con_incapacidad_sin_porcentaje,
-       SUM(con_incapacidad = 0 AND porcentaje IS NOT NULL) AS sin_incapacidad_con_porcentaje_debe_ser_0
+-- C2. Control de porcentaje: las filas MIGRACION no deben tener porcentaje (ambas columnas deben dar 0).
+SELECT COALESCE(SUM(porcentaje IS NOT NULL), 0)                      AS migracion_con_porcentaje_debe_ser_0,
+       COALESCE(SUM(con_incapacidad = 0 AND porcentaje IS NOT NULL), 0) AS sin_incapacidad_con_porcentaje_debe_ser_0
 FROM cs.denuncias_incapacidad
 WHERE tipo = 'DEFINITIVA' AND origen = 'MIGRACION';
 
@@ -246,9 +293,11 @@ FROM cs.cierres_denuncias_log v
 JOIN (
     SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
     FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
     GROUP BY id_denuncia
 ) u ON u.id_max = v.id_cierre_denuncia_log
-WHERE v.id_incapacidad IS NOT NULL
+WHERE v.id_denuncia IS NOT NULL
+  AND v.id_incapacidad IS NOT NULL
   AND NOT EXISTS (
         SELECT 1
         FROM cs.denuncias_incapacidad di
@@ -256,7 +305,7 @@ WHERE v.id_incapacidad IS NOT NULL
           AND di.tipo = 'DEFINITIVA'
   );
 
--- C4. Muestra de 10 filas migradas contra el cierre original.
+-- C4. Muestra de 10 filas migradas contra el cierre original (sin orden aleatorio: toma las primeras por clave).
 SELECT di.id_denuncia_incapacidad,
        di.id_denuncia,
        di.con_incapacidad,
@@ -272,12 +321,13 @@ FROM cs.denuncias_incapacidad di
 JOIN (
     SELECT id_denuncia, MAX(id_cierre_denuncia_log) AS id_max
     FROM cs.cierres_denuncias_log
+    WHERE id_denuncia IS NOT NULL
     GROUP BY id_denuncia
 ) u ON u.id_denuncia = di.id_denuncia
 JOIN cs.cierres_denuncias_log v ON v.id_cierre_denuncia_log = u.id_max
 WHERE di.tipo = 'DEFINITIVA'
   AND di.origen = 'MIGRACION'
-ORDER BY RAND()
+ORDER BY di.id_denuncia_incapacidad
 LIMIT 10;
 
 
@@ -285,15 +335,16 @@ LIMIT 10;
 -- NOTAS
 -- ============================================
 -- Que NO cubre:
---   * La incapacidad PRESUNTA no se backfillea. cs.denuncias.porcentaje_incapacidad es una
---     columna compartida entre la presunta y la definitiva y no se puede separar con certeza
---     cual de las dos representa; ademas el cierre copia ese valor. Las filas PRESUNTA las
---     escriben los ws desde ahora.
+--   * El porcentaje de las filas MIGRACION queda NULL (decision D3): la columna
+--     porcentaje_incapacidad es compartida entre la presunta y la definitiva y no se puede
+--     separar con certeza cual de las dos representa; ademas el cierre copia ese valor.
+--     Solo se carga con_incapacidad (desde id_incapacidad).
+--   * La incapacidad PRESUNTA no se backfillea. Las filas PRESUNTA las escriben los ws
+--     desde ahora.
 --   * Denuncias cuyo cierre vigente tiene id_incapacidad NULL (p. ej. cierres por muerte,
 --     donde el cierre borra el dato): quedan sin fila, o sea "sin dato".
+--   * Filas del log con id_denuncia NULL: se ignoran (A1b las cuenta).
 --   * Denuncias cerradas que nunca pasaron por cierres_denuncias_log: no hay fuente.
---   * Porcentajes con texto no numerico, fuera de 0 a 100 o con mas de 4 decimales: la fila
---     se inserta con con_incapacidad correcto y porcentaje NULL (ver A5 y A5b).
 --   * Una denuncia reabierta cuyo ultimo cierre tenia incapacidad se carga igual (A9 la cuenta).
 --
 -- Como revertir (solo lo que cargo este script):
