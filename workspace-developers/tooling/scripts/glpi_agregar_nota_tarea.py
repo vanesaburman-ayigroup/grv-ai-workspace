@@ -83,6 +83,57 @@ def nota_2892() -> tuple[str, str]:
     return m, c
 
 
+def nota_2883() -> tuple[str, str]:
+    m = "[DIAGNOSTICO N3 GLPI-2883]"
+    c = (p(m) + "<h3>Resumen del pedido</h3>"
+         + p("Lote de cartas para la Solicitud de CD (GCBA AUTOSEGURO, tipo 158), pedido por Agustín Mesplet (Gestor de Registros y Afiliaciones) el 1/10; "
+             "Laila Chaina (Team Leader) agregó 'Respuesta a Telegrama' (carta 7 de OTRAS CITACIONES, ya contemplada en GLPI 2632). "
+             "Son 18 cartas nuevas: 1 en ABANDONO (nro 10), 5 en ALTAS (nros 5 a 9), 8 en un módulo nuevo MORTALES (nros 1 a 8) y 4 en RECHAZOS (nros 19 a 22). "
+             "Además 2 bajas lógicas (activo = 0, sin DELETE): OTRAS CITACIONES 6 (id 34, 9 solicitudes; se mueve a MORTALES 1) y RECHAZOS 14 (id 48, 73 solicitudes; la reemplaza RECHAZOS 19). "
+             "Datos verificados en PROD solo con SELECT; la tabla cs.cd_cartas es latin1 con UK (id_modulo, numero_carta) e id_carta AUTO_INCREMENT.")
+         + "<h3>Veredicto consumers-of</h3>"
+         + p("Mismo mecanismo que GLPI 2632: NO hay que tocar código. Las cartas se leen dinámicamente (wslistados, wssolicitudesgenericas, MFE solicitudesgenericas), "
+             "nadie hardcodea id_carta ni numero_carta, sin caché, sin redeploy ni reinicio. El módulo nuevo también aparece solo (findByActivoTrue). "
+             "Ver GLPI 2632 (docs/soporte-n3/GLPI-2632/03-consumers.md).")
+         + "<h3>Tabla del lote</h3>"
+         + ul([
+             "ABANDONO (1), nro 10: Citación a Turno Médico con prórroga.",
+             "ALTAS (3), nro 5: Alta por telemedicina. Adecuada a Res. 20-2026.",
+             "ALTAS (3), nro 6: Se revoca alta por dictamen.",
+             "ALTAS (3), nro 7: Comunicación resultado de Hipoacusia detectada en exámenes periódicos.",
+             "ALTAS (3), nro 8: Suspensión de Tratamiento por afección inculpable.",
+             "ALTAS (3), nro 9: Rectificación Alta con incapacidad a sin incapacidad.",
+             "MORTALES (nuevo, 'MODULO MORTALES', id 9 por AUTO_INCREMENT), nro 1: Suspensión plazos 298 Derechohabientes. Pedido de documentación.",
+             "MORTALES, nro 2: Aceptación 298 Derechohabientes: Solicitud de documentación no recibida.",
+             "MORTALES, nro 3: Rechazo ACV. Mortal y otros (cardiopatías, edemas pulmonares) no derivados ni de accidentes ni de enfermedades.",
+             "MORTALES, nro 4: Rechazo por prescripción (fecha del hecho).",
+             "MORTALES, nro 5: Rechazo por prescripción (fecha de la denuncia).",
+             "MORTALES, nro 6: Rechazo por falta de datos objetivos: Solicitud de autopsia.",
+             "MORTALES, nro 7: Rechazo por falta de datos objetivos: Solicitud de documentación relacionada jornada laboral - recorrido del siniestro.",
+             "MORTALES, nro 8: Rechazo mortal-trabajador fuera de nómina.",
+             "RECHAZOS (8), nro 19: Rechazo Accidente dentro de su domicilio - No configura in itinere.",
+             "RECHAZOS (8), nro 20: Reversión de rechazo con citación a recibir prestaciones (caso rechazado sin alta médica). Indicación de S.R.T.",
+             "RECHAZOS (8), nro 21: Reversión de rechazo. Caso sin alta. Citación.",
+             "RECHAZOS (8), nro 22: Reversión de rechazo. Caso con alta.",
+         ])
+         + "<h3>Cartas ambiguas y dudas abiertas (comentadas en el script, no se insertan)</h3>"
+         + ul([
+             "Rechazo PMI anterior a vigencia de Autoseguro (RECHAZOS): GLPI 2632 ya propone 'EP FECHA PMI ANTERIOR VIGENCIA' (RECHAZOS 18). Si es la misma, se renombra en 2632 y no se inserta; si son dos cartas, esta sería la 23.",
+             "Deslinde de responsabilidad por abandono en caso de serológico (OTRAS CITACIONES): ya existe en ABANDONO (id 64, nro 9, 18 solicitudes). Confirmar si es otra carta o la misma mal ubicada.",
+             "Rechazo pluriempleo. Lugar de destino de otra A.R.T. (RECHAZOS): existe id 50, nro 16, 'RECHAZO PLURIEMPLEO' (3 solicitudes). ¿Carta nueva o renombre?",
+             "Rechazo por no concurrir a citación (RECHAZOS): parecida a id 39, nro 5.",
+             "Rechazo por alteración del trayecto IN ITINERE (RECHAZOS): parecida a id 38, nro 4.",
+             "'Alta por telemedicina. Adecuada a Res. 20-2026.' convive con ALTAS 4 'Alta por telemedicina' (id 19, 1577 solicitudes): se inserta como carta nueva, no como renombre. Confirmar.",
+             "'Suspensión plazos 298 Derechohabientes' se escribe sin el punto después de 298, como en el pedido (la carta vieja lo tenía).",
+         ])
+         + "<h3>Dependencia con GLPI 2632</h3>"
+         + p("Orden de aplicación: primero GLPI 2632, después este script en bajo y luego PROD. En OTRAS CITACIONES el número 7 queda reservado para 'Respuesta a Telegrama' (2632) y el 8 para la ambigua 'Deslinde'; "
+             "en RECHAZOS el 17 está inactiva (no se toca) y el 18 está reservado por 2632, de ahí se numera desde el 19. Verificación con HEX y chequeo de '?' (latin1) incluidos; el rollback chequea uso previo.")
+         + "<h3>01-script.sql</h3>" + pre(leer(2883, "01-script.sql"))
+         + "<h3>02-rollback.sql</h3>" + pre(leer(2883, "02-rollback.sql")))
+    return m, c
+
+
 def nota_2738() -> tuple[str, str]:
     m = "[DIAGNOSTICO N3 GLPI-2738]"
     plan = leer(2738, "01-plan-fix.md")
@@ -91,30 +142,43 @@ def nota_2738() -> tuple[str, str]:
     if len(clientes) < 25:
         raise RuntimeError(f"no pude parsear la tabla de clientes de 01-plan-fix.md ({len(clientes)} filas)")
     c = (p(m) + "<h3>Causa raíz</h3>"
-         + p("El front resuelve el logo del cliente con un switch cerrado de 14 clientes; el resto devuelve undefined "
+         + p("El front resuelve el logo del cliente con un switch cerrado de 14 clientes; el resto devuelve undefined/null "
              "(la cabecera muestra '-' y DatosDenuncia muestra un <img> roto). Los 14 nombres del switch coinciden con "
              "REPLACE(REPLACE(clientes.nombre,' ',''),'.','') en BD: el backend está bien. Faltan logos de ~30 clientes y falta una guardia.")
-         + "<h3>Plan de fix (resumen, sin aplicar)</h3>"
+         + "<h3>Dónde está el problema (hay varias copias del switch)</h3>"
          + ul([
-             "libreriamodulosgrv (base origin/master 4.23.1, en worktree nuevo): en src/utils/utils.tsx reemplazar el switch por un mapa LOGOS con clave normalizada "
-             "(sin tildes, mayúsculas, solo A-Z0-9). Agregar los cases/entradas de los clientes nuevos cuando haya PNG (IAPSER, GCBA, Chubut, etc.) y alias de sub-marcas "
-             "'Seguridad e Higiene - X' (IAPSER, HORIZONTE, GOB CHUBUT, AUTOSEGURO GCBA) a confirmar con Comercial. PNG nuevos en src/assets/LogosClientes/.",
-             "Guardia en DatosDenuncia.tsx:153: si getLogoCliente devuelve undefined no renderizar el <img> roto; mostrar texto o '-' (mismo criterio que CabeceraDenuncia.tsx:157-160).",
-             "Cierre de la lib: tests/story (sin logo, con tilde, sub-marca), bump patch 4.23.2, npm run lint y typecheck.",
-             "MFE a bumpear a sas-modules-features-lib 4.23.2: atencioncliente (4.11.0), logistica (4.11.0), auditoriafacturacion (4.18.1), auditoriamedica (4.18.1), mesadecarga (4.18.1), tramitadores (4.23.1). "
-             "En los de 4.11.0 y 4.18.1 revisar el CHANGELOG de la lib antes (el salto arrastra cambios intermedios). Lint y typecheck en cada uno.",
-             "Copias propias del switch (decidir alcance): grv-frontend Utils/icons.js y contrataciones Utils/icons.js (mismo switch de 14, default null, <img> sin guardia en DatosDenuncia.js); "
-             "portalclientes utils/utils.js:53 (solo 7 logos; sus usuarios son ART/aseguradoras, conviene completar).",
+             "CEM usa el repo repos/grvx/frontend/frontend (@grv/frontend, lib 4.23.1) y tiene su PROPIA copia del switch: Utils/icons.js:16-50 (getImage, 14 cases, default null, PNG en commons/assets/LogoCliente/). "
+             "El síntoma de Mesa es DatosDenuncia.js:403, un <img> sin guardia. cabeceraCompleta.js:406-407 y Form/Cabecera/cabecera.js:258,472 tienen una guardia que mira nombreLogo y no el resultado de getImage, por eso tampoco protege.",
+             "CEM no usa CabeceraDenuncia ni DatosDenuncia de la lib para el logo: la lib no es la causa del síntoma en CEM. Sí lo es para los MFE que usan CabeceraDenuncia de la lib (libreriamodulosgrv, src/utils/utils.tsx y DatosDenuncia.tsx:153).",
+             "No existen logos oficiales extra en ningún repo: solo los mismos 14 PNG copiados (CEM, contrataciones, tramitadores, lib; solicitudesgenericas tiene 10 y portalclientes 7).",
+             "Alias reutilizables sin logo nuevo: Horizonte INACTIVO, S&H Horizonte y CD Cuentas Gerenciadas Horizonte usan el logo HORIZONTE. Colonia Suiza Salud solo tiene logos corporativos (el legado logo_img .gif no tiene consumidores).",
+         ])
+         + "<h3>Plan de fix (sin aplicar)</h3>"
+         + ul([
+             "Frontend CEM (repos/grvx/frontend/frontend, obligatorio): en Utils/icons.js normalizar la clave (sin tildes, mayúsculas, solo A-Z0-9), sumar los logos nuevos y alias de sub-marcas, y poner guardias en DatosDenuncia.js:403, cabeceraCompleta.js:406-407 y cabecera.js:258,472 que miren el resultado de getImage.",
+             "contrataciones (mismo patrón): Utils/icons.js y guardia en DatosDenuncia.js:298 (y cabecera.js:218,389-391, CabeceraCompleta.js:341-342).",
+             "libreriamodulosgrv (base origin/master 4.23.1, en worktree nuevo): en src/utils/utils.tsx reemplazar el switch por un mapa normalizado con los logos y alias nuevos, assets en src/assets/LogosClientes/ y guardia en DatosDenuncia.tsx:153 (mismo criterio que CabeceraDenuncia.tsx:157-160). Bump 4.23.2, tests/story, lint y typecheck.",
+             "MFE que usan CabeceraDenuncia de la lib, solo con bump a 4.23.2: atencioncliente (4.11.0), logistica (4.11.0), auditoriafacturacion (4.18.1), auditoriamedica (4.18.1), mesadecarga (4.18.1), tramitadores (4.23.1). En los de 4.11.0 y 4.18.1 revisar el CHANGELOG de la lib antes (el salto arrastra cambios intermedios). Lint y typecheck en cada uno.",
+             "portalclientes (opcional): utils/utils.js:53 tiene solo 7 logos y sus usuarios son ART/aseguradoras; conviene completar.",
+             "Recomendación: un solo catálogo compartido en la lib (reutilizar catalogo.json de feature/logos-clientes-portables: agregar un cliente = PNG + una línea) que CEM y contrataciones importen, en vez de mantener tres copias del switch.",
              "Backend: nada obligatorio. Higiene opcional en otro ticket: wsempleador EmpleadorPolizaSearchServiceImpl usa razonSocial en vez de nombre.",
          ])
+         + "<h3>Estimación</h3>"
+         + p("Revisada a 8 h: tres repos (CEM, contrataciones, lib) más los bumps de los MFE consumidores.")
          + "<h3>Clientes sin logo, por volumen de denuncias</h3>" + ul(clientes)
          + p("Pedido mínimo a Mesa/Comercial (impacto 2026): IAPSER (14.280, más 1.431 de Seguridad e Higiene), GCBA (7.936), Autoseguro Chubut (1.415), "
              "SMG Compañía Argentina de Seguros (413), Consejo de la Magistratura (315), Ministerio Público de la Defensa (195), BAPRO (163). "
-             "Confirmar que las sub-marcas usan el logo de la marca madre. Detalle en docs/soporte-n3/GLPI-2738/01-plan-fix.md."))
+             "Confirmar que las sub-marcas usan el logo de la marca madre.")
+         + "<h3>Pendientes</h3>"
+         + ul([
+             "Logos oficiales de Mesa/Comercial (PNG, mismo estilo y tamaño que los existentes).",
+             "Ver la pantalla en vivo con una denuncia IAPSER o GCBA en CEM para confirmar el síntoma.",
+             "Detalle en docs/soporte-n3/GLPI-2738/01-plan-fix.md y 03-consumers.md.",
+         ]))
     return m, c
 
 
-TAREAS = {209: (2632, nota_2632), 210: (2892, nota_2892), 211: (2738, nota_2738)}
+TAREAS = {209: (2632, nota_2632), 210: (2892, nota_2892), 211: (2738, nota_2738), 212: (2883, nota_2883)}
 
 
 def csrf(page: str) -> str:
@@ -188,7 +252,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--editar", action="store_true", help="actualiza in place la nota existente con el texto actual")
-    ap.add_argument("--solo", type=int, help="procesar solo este ticket (2632, 2892, 2738)")
+    ap.add_argument("--solo", type=int, help="procesar solo este ticket (2632, 2892, 2738, 2883)")
     a = ap.parse_args()
     s = glpi.Session()
     for tid, (ticket, build) in TAREAS.items():

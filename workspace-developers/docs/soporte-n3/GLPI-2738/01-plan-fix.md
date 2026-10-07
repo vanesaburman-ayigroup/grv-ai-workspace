@@ -27,11 +27,12 @@ static getLogoCliente = (nombreLogo?: string | null) => LOGOS[normalizarClave(no
 
 Si se adopta `catalogo.json` de `feature/logos-clientes-portables` (clave -> PNG), que sea la fuente unica y el mapa se genere de ahi: agregar cliente = PNG + una linea.
 
-Alias de sub-marcas (decidir con Comercial si comparten logo con la marca madre), como entradas extra en `LOGOS`:
+Alias de sub-marcas (decidido: las "Seguridad e Higiene - X" usan el logo de la marca madre; GALENO usa el de GALENO ART), como entradas extra en `LOGOS`:
 - `SEGURIDADEHIGIENEIAPSER`, `SEGURIDADEHIGIENEIAPSERNOGERENCIADO` -> logo IAPSER
 - `SEGURIDADEHIGIENEHORIZONTE`, `HORIZONTE...INACTIVO`, `CDCUENTASGERENCIADASHORIZONTE` -> HORIZONTE (ya existe)
 - `SEGURIDADEHIGIENEGOBCHUBUT` -> Chubut
 - `SEGURIDADEHIGIENEAUTOSEGUROGCBA`, `CDCUENTAGERENCIADAAUTOSEGUROGCBA` -> GCBA
+- `GALENO` (id 10, 10 denuncias) -> logo de `GALENOART` (id 17); misma marca
 
 ### b) `src/assets/LogosClientes/`
 Agregar los PNG nuevos (mismo estilo y tamano que los existentes; los provee Mesa/Comercial) y un `import` por cada uno.
@@ -104,4 +105,4 @@ Fuente: tabla `cs.clientes` + `cs.denuncias` (SELECT, MCP MariaDB; @@hostname = 
 | 28 | 34 | CD CUENTAS GERENCIADAS HORIZONTE | 1 | 0 |
 | 29-30 | 7, 12 | EL COMERCIO, NOGOYA | 0 | 0 |
 
-Pedido minimo a Mesa/Comercial (impacto real hoy, por denuncias 2026): IAPSER (14.280, mas 1.431 de Seguridad e Higiene), GCBA (7.936, mas 20), Autoseguro Chubut (1.415, mas 45), SMG Compania Argentina de Seguros (413), Consejo de la Magistratura (315), Ministerio Publico de la Defensa (195), BAPRO (163). Confirmar que las sub-marcas "Seguridad e Higiene - X" usan el logo de la marca madre. Preguntar si MAPFRE, Interaccion ART y Corredores Viales (historicos, sin actividad 2026) importan.
+Pedido minimo a Mesa/Comercial (impacto real hoy, por denuncias 2026): IAPSER (14.280, mas 1.431 de Seguridad e Higiene), GCBA (7.936, mas 20), Autoseguro Chubut (1.415, mas 45), SMG Compania Argentina de Seguros (413), Consejo de la Magistratura (315), Ministerio Publico de la Defensa (195), BAPRO (163). Decisiones: las sub-marcas "Seguridad e Higiene - X" usan el logo de la marca madre (no se piden aparte), y GALENO comparte el logo de GALENO ART. Se piden tambien los logos de los historicos MAPFRE, Interaccion ART y Corredores Viales (sin actividad 2026) por las dudas; sumar el resto de la tabla (Woranz, Gobierno de Cordoba, Meopp, La Segunda, Rivadavia) si estan disponibles.
