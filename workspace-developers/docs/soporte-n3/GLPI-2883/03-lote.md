@@ -13,7 +13,7 @@ Consumidores: ver `../GLPI-2632/03-consumers.md` (mismo mecanismo; el combo se l
 | Comunicación resultado de Hipoacusia detectada en exámenes periódicos. | ALTAS (3) | 7 | Mesplet |
 | Suspensión de Tratamiento por afección inculpable. | ALTAS (3) | 8 | Mesplet |
 | Rectificación Alta con incapacidad a sin incapacidad. | ALTAS (3) | 9 | Mesplet |
-| Suspensión plazos 298 Derechohabientes. Pedido de documentación | MORTALES (nuevo, id 9 por AUTO_INCREMENT) | 1 | Mesplet |
+| Suspensión plazos 298 Derechohabientes. Pedido de documentación | MORTALES (nuevo, id 11 por AUTO_INCREMENT) | 1 | Mesplet |
 | Aceptación 298 Derechohabientes: Solicitud de documentación no recibida | MORTALES | 2 | Mesplet |
 | Rechazo ACV. Mortal y otros (cardiopatías, edemas pulmonares) no derivados ni de accidentes ni de enfermedades | MORTALES | 3 | Mesplet |
 | Rechazo por prescripción (fecha del hecho) | MORTALES | 4 | Mesplet |

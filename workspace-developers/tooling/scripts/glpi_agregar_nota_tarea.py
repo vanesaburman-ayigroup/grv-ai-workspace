@@ -98,7 +98,8 @@ def nota_2892() -> tuple[str, str]:
 
 def nota_2883() -> tuple[str, str]:
     m = "[DIAGNOSTICO N3 GLPI-2883]"
-    c = (p(m) + "<h3>Resumen del pedido</h3>"
+    c = (p("ESTADO: aplicado en PROD el 07/10/2026 (verificado: 18 cartas activas, módulo MORTALES id 11, bajas id 34 y 48 con activo=0, sin pérdida de caracteres). Ticket resuelto.")
+         + p(m) + "<h3>Resumen del pedido</h3>"
          + p("Lote de cartas para la Solicitud de CD (GCBA AUTOSEGURO, tipo 158), pedido por Agustín Mesplet (Gestor de Registros y Afiliaciones) el 1/10; "
              "Laila Chaina (Team Leader) agregó 'Respuesta a Telegrama' (carta 7 de OTRAS CITACIONES, ya contemplada en GLPI 2632). "
              "Son 18 cartas nuevas: 1 en ABANDONO (nro 10), 5 en ALTAS (nros 5 a 9), 8 en un módulo nuevo MORTALES (nros 1 a 8) y 4 en RECHAZOS (nros 19 a 22). "
@@ -116,7 +117,7 @@ def nota_2883() -> tuple[str, str]:
              "ALTAS (3), nro 7: Comunicación resultado de Hipoacusia detectada en exámenes periódicos.",
              "ALTAS (3), nro 8: Suspensión de Tratamiento por afección inculpable.",
              "ALTAS (3), nro 9: Rectificación Alta con incapacidad a sin incapacidad.",
-             "MORTALES (nuevo, 'MODULO MORTALES', id 9 por AUTO_INCREMENT), nro 1: Suspensión plazos 298 Derechohabientes. Pedido de documentación.",
+             "MORTALES (nuevo, 'MODULO MORTALES', id 11 por AUTO_INCREMENT), nro 1: Suspensión plazos 298 Derechohabientes. Pedido de documentación.",
              "MORTALES, nro 2: Aceptación 298 Derechohabientes: Solicitud de documentación no recibida.",
              "MORTALES, nro 3: Rechazo ACV. Mortal y otros (cardiopatías, edemas pulmonares) no derivados ni de accidentes ni de enfermedades.",
              "MORTALES, nro 4: Rechazo por prescripción (fecha del hecho).",
@@ -129,26 +130,17 @@ def nota_2883() -> tuple[str, str]:
              "RECHAZOS (8), nro 21: Reversión de rechazo. Caso sin alta. Citación.",
              "RECHAZOS (8), nro 22: Reversión de rechazo. Caso con alta.",
          ])
-         + "<h3>Resuelta</h3>"
-         + p("La carta de PMI quedó RESUELTA: 'Rechazo PMI anterior a vigencia de Autoseguro' es la misma que 'EP FECHA PMI ANTERIOR VIGENCIA' de GLPI 2632 (definido por la usuaria). "
-             "Va solo en 2632 (RECHAZOS 18) y no en este lote.")
-         + "<h3>Cartas ambiguas y dudas abiertas (comentadas en el script, no se insertan)</h3>"
-         + p("Quedan 4 ambiguas; si se activan se numeran 8, 23, 24 y 25 respectivamente.")
+         + "<h3>Cartas pedidas que ya existían (no se insertan)</h3>"
          + ul([
-             "Deslinde serológico (OTRAS CITACIONES, nro 8): ya existe en ABANDONO (id 64, nro 9, 18 solicitudes). Confirmar si es otra carta o la misma mal ubicada.",
-             "Pluriempleo (RECHAZOS, nro 23): existe id 50, nro 16, 'RECHAZO PLURIEMPLEO' (3 solicitudes). ¿Carta nueva o renombre?",
-             "No concurrir a citación (RECHAZOS, nro 24): parecida a id 39, nro 5.",
-             "Trayecto IN ITINERE (RECHAZOS, nro 25): parecida a id 38, nro 4.",
-         ])
-         + "<h3>Marcas '>>>' del script a confirmar antes de ejecutar</h3>"
-         + ul([
-             ">>> MORTALES: módulo nuevo (no existe hoy) con 8 cartas. Confirmar con Agustín Mesplet que es un módulo y no una carta.",
-             ">>> CARTA NUEVA (telemedicina): 'Alta por telemedicina. Adecuada a Res. 20-2026.' se inserta como carta nueva (ALTAS 5) aunque ya existe 'Alta por telemedicina' (ALTAS 4, id 19, 1577 solicitudes). Confirmar que no es un renombre.",
-             "'Suspensión plazos 298 Derechohabientes' se escribe sin el punto después de 298, como en el pedido (la carta vieja lo tenía).",
+             "Rechazo PMI anterior a vigencia de Autoseguro: RECHAZOS 18 'EP FECHA PMI ANTERIOR VIGENCIA' (misma carta, cargada por GLPI 2632).",
+             "Deslinde de responsabilidad por abandono en caso de serológico: ABANDONO 9 'Se notifica deslinde de Responsabilidad por inasistencia. Casos Serológicos'.",
+             "Rechazo pluriempleo. Lugar de destino de otra A.R.T.: RECHAZOS 16 'RECHAZO PLURIEMPLEO'.",
+             "Rechazo por no concurrir a citación: RECHAZOS 5 'Rechazo Inasistencia Citación médica con conocimiento de fecha de notif. Fehaciente'.",
+             "Rechazo por alteración del trayecto IN ITINERE: RECHAZOS 4 'Rechazo evaluación médica + altera In itinere'.",
          ])
          + "<h3>Dependencia con GLPI 2632</h3>"
-         + p("GLPI 2632 ya está aplicada en PROD (ids 68 y 69), por lo que la dependencia de numeración queda cumplida: OTRAS CITACIONES 7 'Respuesta a Telegrama' y RECHAZOS 18 'EP FECHA PMI ANTERIOR VIGENCIA' están ocupadas. "
-             "En RECHAZOS el 17 está inactiva (no se toca), de ahí se numera desde el 19. Orden: este script en bajo y luego PROD (aún pendiente, se aplica otro día). "
+         + p("GLPI 2632 ya está aplicada en PROD (ids 68 y 69): OTRAS CITACIONES 7 'Respuesta a Telegrama' y RECHAZOS 18 'EP FECHA PMI ANTERIOR VIGENCIA' están ocupadas. "
+             "En RECHAZOS el 17 está inactiva (no se toca), de ahí se numera desde el 19. "
              "Verificación con HEX y chequeo de '?' (latin1) incluidos; el rollback chequea uso previo.")
          + "<h3>01-script.sql</h3>" + pre(leer(2883, "01-script.sql"))
          + "<h3>02-rollback.sql</h3>" + pre(leer(2883, "02-rollback.sql")))
