@@ -71,13 +71,25 @@ def nota_2892() -> tuple[str, str]:
     m = "[DIAGNOSTICO N3 GLPI-2892]"
     c = (p(m) + "<h3>Causa raíz</h3>"
          + p("Falta 'Nota de Débito' en el catálogo cs.tipo_facturacion (lo lee wslistados GET /tipos-facturacion y alimenta los "
-             "desplegables 'Tipo de factura' del MFE auditoriafacturacion). Se agregan Nota de Débito A/B/C/M.")
+             "desplegables 'Tipo de factura' del MFE auditoriafacturacion). El alta es de 10 filas en cs.tipo_facturacion: "
+             "Nota de Débito A/B/C/M, Factura MiPyME A/B/C y Nota de Débito MiPyME A/B/C "
+             "(Factura de Crédito Electrónica MiPyME, Ley 27.440). La Nota de Crédito MiPyME NO se agrega porque resta y requeriría código. "
+             "Ids esperados 10-19; total 19 filas.")
          + "<h3>Veredicto consumers-of</h3>"
          + p("NO hay que tocar código: alcanza con el INSERT. Ningún consumidor ramifica por id ni por descripción; sin caché. "
              "Única dependencia textual: la descripción debe terminar en la letra (BuscadorDialog.tsx y vista consulta_auditoria_facturacion_view), "
              "que se cumple. Tabla latin1: ejecutar con charset coherente y verificar el HEX. "
-             "Pendiente de negocio (no bloquea): alcance A/B/C/M vs MiPyme; una nota de crédito si exigiría código. "
              "Detalle en docs/soporte-n3/GLPI-2892/03-consumers.md.")
+         + "<h3>Advertencia operativa</h3>"
+         + p("La tabla es latin1 y el cliente suele ser utf8mb4; el script convierte el literal con CONVERT(v.descripcion USING latin1) "
+             "en el NOT EXISTS para evitar el error 1267 'Illegal mix of collations'.")
+         + "<h3>Decisiones de negocio</h3>"
+         + p("Resuelta: los comprobantes MiPyME se incluyen.")
+         + "<h3>Preguntas abiertas (no bloquean el alta)</h3>"
+         + ul(["¿El monto de la Nota de Débito es positivo?",
+               "¿Se debe impedir una Nota de Débito con el mismo número que una factura?",
+               "¿En qué pantallas aplica?",
+               "Confirmar con Nacho Núñez que audita facturas MiPyME."])
          + "<h3>01-script.sql</h3>" + pre(leer(2892, "01-script.sql"))
          + "<h3>02-rollback.sql</h3>" + pre(leer(2892, "02-rollback.sql")))
     return m, c
