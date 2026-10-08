@@ -31,8 +31,8 @@
 --                        --  LEFT JOIN cs.personas p ON p.id_persona = l.id_responsable
 --                        --  WHERE l.id_responsable IS NOT NULL
 --                        --    AND (l.id_responsable = 0 OR p.id_persona IS NULL);
---   Indice: SHOW INDEX FROM cs.cierres_denuncias_log; debe haber uno por
---                        -- (id_denuncia, id_cierre_denuncia_log). Sin el, el MAX por denuncia
+--   Indice: SHOW INDEX FROM cs.cierres_denuncias_log; en produccion existe idx_cdl_id_denuncia (id_denuncia)
+--                        -- y, como InnoDB agrega la PK a cada indice secundario, equivale a (id_denuncia, id_cierre_denuncia_log). Sin el, el MAX por denuncia
 --                        -- es un full scan agrupado. Correr EXPLAIN del SELECT interno de A7
 --                        -- (el derivado con MAX ... GROUP BY) y revisar que use ese indice.
 --   SELECT @@hostname;   -- el MCP del entorno lee PROD; el script se corre en el
@@ -80,8 +80,10 @@
 --   Procedimiento 2 (ALTERNATIVA mas segura) - una vez en auto-commit, sin transaccion abierta:
 --     * Como el INSERT es idempotente y se revierte con el DELETE de "Como revertir",
 --       puede correrse UNA vez en auto-commit: ejecutar solo el INSERT y el SELECT
---       ROW_COUNT() siguiente (en el mismo script), SIN SET SESSION ... READ COMMITTED
---       ni START TRANSACTION. No deja nada abierto si algo sale mal.
+--       ROW_COUNT() siguiente (en el mismo script), SIN START TRANSACTION. Si @@binlog_format es MIXED o ROW
+--       (en produccion es MIXED) conviene SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED antes del INSERT
+--       para no tomar locks compartidos sobre las ~569 mil filas leidas; con STATEMENT NO usarlo (error 1665).
+--       No deja nada abierto si algo sale mal.
 --     * Despues correr los controles C (C1 a C4) y comparar filas_insertadas con A7.
 --     * Si fallan los controles C: revertir con el DELETE (con copia previa, ver abajo).
 --     * Misma carrera del 1062: el INSERT falla entero y no deja filas; repetir.
