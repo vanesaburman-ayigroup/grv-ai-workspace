@@ -8,6 +8,13 @@
 --
 -- Verificar antes de aplicar (solo lectura):
 --   SELECT VERSION();
+--   Valores verificados en el primario de produccion (MariaDB 10.5.29): @@tx_isolation = REPEATABLE-READ,
+--   @@binlog_format = MIXED (READ COMMITTED es compatible), @@innodb_lock_wait_timeout = 50,
+--   @@lock_wait_timeout = 86400, sql_mode estricto sin NO_ZERO_DATE, cierres_denuncias_log con
+--   ~569 mil filas, ninguna con id_denuncia NULL, indice idx_cdl_id_denuncia (id_denuncia).
+--   cs.estados_medicos.es_cierre y cs.denuncias.id_estado_medico existen (la consulta A9 es valida).
+--   Tipos reales: cierres_denuncias_log.id_denuncia INT(11), id_responsable DECIMAL(22,0).
+--   La conexion del MCP tiene @@autocommit = 0: en el cliente que uses verificar @@autocommit.
 --   SELECT @@sql_mode, @@binlog_format, @@tx_isolation, @@lock_wait_timeout;
 --                        -- En MariaDB 10.x la variable es @@tx_isolation; @@transaction_isolation
 --                        -- (error 1193 si no existe) recien se llama asi desde MariaDB 11.1+.
@@ -249,6 +256,10 @@ WHERE v.id_incapacidad IS NOT NULL
 -- ============================================
 
 SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+-- En produccion @@lock_wait_timeout es 86400 s (24 h): una espera por bloqueo de metadatos
+-- (p. ej. una transaccion abierta sobre cierres_denuncias_log) podria colgar la sesion un dia.
+-- Con este valor la sesion falla rapido en lugar de esperar.
+SET SESSION lock_wait_timeout = 10;
 
 -- Control: @@autocommit puede ser 1 (START TRANSACTION lo suspende hasta COMMIT/ROLLBACK);
 -- @@in_transaction debe ser 0 antes de empezar (si da 1 hay una transaccion abierta previa).

@@ -12,10 +12,10 @@
 -- Verificar antes de aplicar (solo lectura):
 --   1. SHOW CREATE TABLE cs.denuncias;
 --      El tipo de id_denuncia debe coincidir con la columna id_denuncia de abajo
---      (hoy DECIMAL(22,0)).
+--      (cs.denuncias.id_denuncia es INT(11); verificado en el primario de produccion).
 --   2. SHOW CREATE TABLE cs.personas;
 --      El tipo de id_persona debe coincidir con la columna id_persona de abajo
---      (hoy DECIMAL(22,0)).
+--      (cs.personas.id_persona es DECIMAL(22,0); verificado en el primario de produccion).
 --   3. SELECT VERSION();
 --      Los CHECK solo se aplican desde MariaDB 10.2.1; en versiones anteriores
 --      se aceptan y se ignoran sin error, y la tabla quedaria sin validacion.
@@ -52,7 +52,7 @@
 
 CREATE TABLE cs.denuncias_incapacidad (
     id_denuncia_incapacidad BIGINT NOT NULL AUTO_INCREMENT,
-    id_denuncia             DECIMAL(22,0) NOT NULL,
+    id_denuncia             INT(11)       NOT NULL,
     tipo                    VARCHAR(12) NOT NULL,
     con_incapacidad         TINYINT(1) NOT NULL DEFAULT 0,
     porcentaje              DECIMAL(5,2) NULL,
