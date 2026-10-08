@@ -6,7 +6,7 @@
 --
 -- Columnas y valores de CHECK (las entidades Java dependen de ellos):
 --   tipo   : PRESUNTA | DEFINITIVA
---   origen : MANUAL | CIERRE | MIGRACION
+--   origen : MANUAL | CIERRE | MIGRACION | PORTAL
 --   porcentaje : NULL o entre 0 y 100
 --
 -- Verificar antes de aplicar (solo lectura):
@@ -63,7 +63,7 @@ CREATE TABLE cs.denuncias_incapacidad (
     PRIMARY KEY (id_denuncia_incapacidad),
     UNIQUE KEY uk_denuncias_incapacidad_denuncia_tipo (id_denuncia, tipo),
     CONSTRAINT chk_denuncias_incapacidad_tipo CHECK (tipo IN ('DEFINITIVA', 'PRESUNTA')),
-    CONSTRAINT chk_denuncias_incapacidad_origen CHECK (origen IN ('MANUAL', 'CIERRE', 'MIGRACION')),
+    CONSTRAINT chk_denuncias_incapacidad_origen CHECK (origen IN ('MANUAL', 'CIERRE', 'MIGRACION', 'PORTAL')),
     CONSTRAINT chk_denuncias_incapacidad_porcentaje CHECK (porcentaje IS NULL OR porcentaje BETWEEN 0 AND 100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
